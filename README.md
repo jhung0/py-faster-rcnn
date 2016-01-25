@@ -199,3 +199,25 @@ cd $FRCN_ROOT
 ```
 
 This method trains the RPN module jointly with the Fast R-CNN network, rather than alternating between training the two. It results in faster (~ 1.5x speedup) training times and similar detection accuracy. See these [slides](https://www.dropbox.com/s/xtr4yd4i5e0vw8g/iccv15_tutorial_training_rbg.pdf?dl=0) for more details.
+
+
+###Extra
+Format Your Dataset
+
+At first, the dataset must be well organzied with the required format.
+
+DATA
+|-- data
+    |-- Annotations
+         |-- *.txt (Annotation files)
+    |-- Images
+         |-- *.png (Image files)
+    |-- ImageSets
+         |-- train.txt
+The train.txt contains all the names(without extensions) of images files that will be used for training. For example, there are a few lines in train.txt below.
+
+crop_000011
+crop_000603
+crop_000606
+crop_000607
+crop_000608
