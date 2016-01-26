@@ -132,7 +132,11 @@ set
 ```
 __C.USE_GPU_NMS = False
 ```
-It worked for me (using a GPU on AWS).
+and/or change
+```
+sm_35 into sm_30 in lib/setup.py
+```
+It worked using a GPU on AWS (https://github.com/rbgirshick/py-faster-rcnn/issues/2).
 
 ### Beyond the demo: installation for training and testing models
 1. Download the training, validation, test data and VOCdevkit
