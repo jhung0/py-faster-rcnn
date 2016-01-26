@@ -145,12 +145,6 @@ The demo performs detection using a VGG16 network trained for detection on PASCA
 	tar xvf VOCtest_06-Nov-2007.tar
 	tar xvf VOCdevkit_08-Jun-2007.tar
 	```
-	or
-	```Shell
-	tar xvf VOCtrainval_06-Nov-2007.tar
-	tar xvf VOCtest_06-Nov-2007.tar
-	tar xvf VOCdevkit_08-Jun-2007.tar
-	```
 
 3. It should have this basic structure
 
