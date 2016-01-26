@@ -278,3 +278,9 @@ In the directory **$FRCNN_ROOT**, run the following command in the shell.
 ```
 
 Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+
+To use RPN instead of selective search, modify the following flag in "lib/fast-rcnn/config.py":
+```
+# Propose boxes
+__C.TEST.HAS_RPN = True
+```
