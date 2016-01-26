@@ -240,3 +240,13 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
   - Modify `num_classes` to `C`;
   - Modify `num_output` in the `cls_score` layer to `C`
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
+
+### Training
+In the directory **$FRCNN_ROOT**, run the following command in the shell.
+
+```sh
+./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+    --weights data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel --imdb try1_train
+```
+
+Be careful with the **imdb** argument as it specifies the dataset you will train on. 
