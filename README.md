@@ -201,7 +201,7 @@ cd $FRCN_ROOT
 This method trains the RPN module jointly with the Fast R-CNN network, rather than alternating between training the two. It results in faster (~ 1.5x speedup) training times and similar detection accuracy. See these [slides](https://www.dropbox.com/s/xtr4yd4i5e0vw8g/iccv15_tutorial_training_rbg.pdf?dl=0) for more details.
 
 
-###Extra
+###Extra: Train with other data
 ####Format Your Dataset
 
 At first, the dataset must be well organzied with the required format.
