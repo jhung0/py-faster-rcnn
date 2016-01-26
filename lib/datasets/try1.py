@@ -19,7 +19,7 @@ import subprocess
 class try1(datasets.imdb):
     def __init__(self, image_set, devkit_path=None):
         datasets.imdb.__init__(self, image_set)
-        self._image_set = image_set
+        self._image_set = image_set #usually train or test
         self._devkit_path = devkit_path
         self._data_path = os.path.join(self._devkit_path, 'data')
         self._classes = ('__background__', # always index 0

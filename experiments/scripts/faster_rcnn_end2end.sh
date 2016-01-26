@@ -14,8 +14,10 @@ GPU_ID=$1
 NET=$2
 NET_lc=${NET,,}
 ITERS=70000
-DATASET_TRAIN=voc_2007_trainval
-DATASET_TEST=voc_2007_test
+#DATASET_TRAIN=voc_2007_trainval
+#DATASET_TEST=voc_2007_test
+DATASET_TRAIN=try1_trainval
+DATASET_TEST=try1_test
 
 array=( $@ )
 len=${#array[@]}
