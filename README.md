@@ -124,6 +124,16 @@ cd $FRCN_ROOT
 ```
 The demo performs detection using a VGG16 network trained for detection on PASCAL VOC 2007.
 
+I got some errors, so in 
+```
+$FCN_ROOT/lib/fast_rcnn/config.py
+```
+set 
+```
+__C.USE_GPU_NMS = False
+```
+It worked for me (using a GPU on AWS).
+
 ### Beyond the demo: installation for training and testing models
 1. Download the training, validation, test data and VOCdevkit
 
