@@ -241,6 +241,6 @@ class try1(datasets.imdb):
             self.config['cleanup'] = True
 
 if __name__ == '__main__':
-    d = datasets.pascal_voc('trainval', '2007')
+    d = datasets.try1('train', '')
     res = d.roidb
     from IPython import embed; embed()
