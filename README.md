@@ -233,3 +233,10 @@ You need to add a new python file describing the dataset we will use to the dire
   - Do not forget to add `import` syntaxes in your own python file and other python files in the same directory.
 
 Then you should modify the `factory.py` in the same directory.
+
+### Modify Prototxt
+
+For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` in `$FRCNN_ROOTmodels/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
+  - Modify `num_classes` to `C`;
+  - Modify `num_output` in the `cls_score` layer to `C`
+  - Modify `num_output` in the `bbox_pred` layer to `4 * C`
