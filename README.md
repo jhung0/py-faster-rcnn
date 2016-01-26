@@ -224,3 +224,12 @@ crop_000606
 crop_000607
 crop_000608
 ```
+### Construct IMDB
+
+You need to add a new python file describing the dataset we will use to the directory `$FRCNN_ROOT/lib/datasets`. Then the following steps should be taken.
+  - Modify `self._classes` in the constructor function to fit your dataset.
+  - Be careful with the extensions of your image files. See `image_path_from_index`.
+  - Write the function for parsing annotations. See `_load_inria_annotation`.
+  - Do not forget to add `import` syntaxes in your own python file and other python files in the same directory.
+
+Then you should modify the `factory.py` in the same directory.
