@@ -281,6 +281,6 @@ Be careful with the **imdb** argument as it specifies the dataset you will train
 
 To use RPN instead of selective search, modify the following flag in "lib/fast-rcnn/config.py":
 ```
-# Propose boxes
+__C.TRAIN.HAS_RPN = True
 __C.TEST.HAS_RPN = True
 ```
