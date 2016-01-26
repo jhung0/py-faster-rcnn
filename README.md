@@ -205,6 +205,13 @@ cd $FRCN_ROOT
 #   --set EXP_DIR seed_rng1701 RNG_SEED 1701
 ```
 
+If you see this error
+```
+EnvironmentError: MATLAB command 'matlab' not found. Please add 'matlab' to your PATH.
+```
+then you need to make sure the matlab binary is in your $PATH. MATLAB is currently required for PASCAL VOC evaluation.
+
+
 This method trains the RPN module jointly with the Fast R-CNN network, rather than alternating between training the two. It results in faster (~ 1.5x speedup) training times and similar detection accuracy. See these [slides](https://www.dropbox.com/s/xtr4yd4i5e0vw8g/iccv15_tutorial_training_rbg.pdf?dl=0) for more details.
 
 
