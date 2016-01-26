@@ -37,6 +37,12 @@ for top_k in np.arange(1000, 11000, 1000):
             __sets[name] = (lambda split=split, year=year, top_k=top_k:
                     _selective_search_IJCV_top_k(split, year, top_k))
 
+# Set up _<split> using selective search "fast" mode
+devkit_path = '/home/szy/VOC_format'
+for split in ['train', 'test']:
+    name = '{}_{}'.format('try1', split)
+    __sets[name] = (lambda split=split: datasets.try1(split, devkit_path))
+
 def get_imdb(name):
     """Get an imdb (image database) by name."""
     if not __sets.has_key(name):
