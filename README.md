@@ -100,6 +100,15 @@ If you find Faster R-CNN useful in your research, please consider citing:
     # If you're experienced with Caffe and have all of the requirements installed
     # and your Makefile.config in place (copy from Makefile.config.example and uncomment some lines?), then simply do:
     make -j8 && make pycaffe
+    
+    #if it doesn't work, try
+    export PYTHONPATH=/path/to/caffe/python
+    #then maybe recompile
+    cd ~/caffe
+    make all
+    make pycaffe
+    make test
+    make runtest
     ```
 
 5. Download pre-computed Faster R-CNN detectors
