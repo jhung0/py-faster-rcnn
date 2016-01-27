@@ -10,6 +10,7 @@
 __sets = {}
 
 import datasets.pascal_voc
+import datasets.try1
 import numpy as np
 
 def _selective_search_IJCV_top_k(split, year, top_k):
@@ -41,7 +42,7 @@ for top_k in np.arange(1000, 11000, 1000):
 devkit_path = '/home/szy/VOC_format'
 for split in ['train', 'test']:
     name = '{}_{}'.format('try1', split)
-    __sets[name] = (lambda split=split: datasets.try1(split, devkit_path))
+    __sets[name] = (lambda split=split: datasets.try1.try1(split, devkit_path))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
