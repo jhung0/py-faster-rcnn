@@ -292,5 +292,7 @@ __C.TEST.HAS_RPN = True
 
 
 ```
+./tools/rpn_generate.py --gpu 0 --net data/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel --def models/VGG_CNN_M_1024/faster_rcnn_end2end/train.prototxt --imdb try1_train
+
 ./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --imdb try1_train
 ```
