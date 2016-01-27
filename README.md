@@ -243,7 +243,7 @@ This method trains the RPN module jointly with the Fast R-CNN network, rather th
 
 At first, the dataset must be well organzied with the required format.
 ```
-DATA
+try1
 |-- data
     |-- Annotations
          |-- *.txt (Annotation files)
