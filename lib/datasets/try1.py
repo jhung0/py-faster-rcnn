@@ -6,7 +6,8 @@
 # --------------------------------------------------------
 
 import datasets
-import datasets.pascal_voc
+#import datasets.pascal_voc
+import datasets.try1
 import os
 import datasets.imdb
 import numpy as np
@@ -17,7 +18,7 @@ import cPickle
 import subprocess
 
 class try1(datasets.imdb):
-    def __init__(self, image_set, devkit_path=None):
+    def __init__(self, image_set, devkit_path):
         datasets.imdb.__init__(self, image_set)
         self._image_set = image_set #usually train or test
         self._devkit_path = devkit_path
@@ -28,7 +29,7 @@ class try1(datasets.imdb):
         self._image_ext = ['.jpg', '.tif']
         self._image_index = self._load_image_set_index()
         # Default to roidb handler
-        self._roidb_handler = self.selective_search_roidb
+        self._roidb_handler = self.rpn_roidb #self.selective_search_roidb
 
         # PASCAL specific config options
         self.config = {'cleanup'  : True,
@@ -87,7 +88,7 @@ class try1(datasets.imdb):
             print '{} gt roidb loaded from {}'.format(self.name, cache_file)
             return roidb
 
-        gt_roidb = [self._load_pascal_annotation(index)
+        gt_roidb = [self._load_try1_annotation(index)
                     for index in self.image_index]
         with open(cache_file, 'wb') as fid:
             cPickle.dump(gt_roidb, fid, cPickle.HIGHEST_PROTOCOL)
