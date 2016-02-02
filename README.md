@@ -266,7 +266,7 @@ crop_000608
 You need to add a new python file describing the dataset we will use to the directory `$FRCNN_ROOT/lib/datasets`. Then the following steps should be taken.
   - Modify `self._classes` in the constructor function to fit your dataset.
   - Be careful with the extensions of your image files. See `image_path_from_index`.
-  - Write the function for parsing annotations. See `_load_inria_annotation`.
+  - Write the function for parsing annotations. See `_load_try1_annotation`.
   - Do not forget to add `import` syntaxes in your own python file and other python files in the same directory.
 
 Then you should modify the `factory.py` in the same directory.
@@ -279,25 +279,7 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
 
 ### Training
-In the directory **$FRCNN_ROOT**, run the following command in the shell.
-
-```sh
-./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
-    --weights data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel --imdb try1_train
-```
-
-Be careful with the **imdb** argument as it specifies the dataset you will train on. 
-
-To use RPN instead of selective search, modify the following flag in "lib/fast-rcnn/config.py":
-```
-__C.TRAIN.PROPOSAL_METHOD = 'rpn'
-__C.TEST.PROPOSAL_METHOD = 'rpn'
-```
-and maybe
-```
-__C.TRAIN.HAS_RPN = True
-__C.TEST.HAS_RPN = True
-```
+#### RPN
 
 
 ```
@@ -305,3 +287,32 @@ __C.TEST.HAS_RPN = True
 
 ./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --imdb try1_train
 ```
+
+#### RPN + Fast RCNN
+In the directory **$FRCNN_ROOT**, run the following command in the shell.
+
+```sh
+./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+    --weights data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel --imdb try1_train
+```
+Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+
+
+
+
+
+
+
+#### Other
+To use RPN instead of selective search, modify the following flag in "lib/fast-rcnn/config.py":
+```
+__C.TRAIN.PROPOSAL_METHOD = 'gt'
+__C.TEST.PROPOSAL_METHOD = 'gt'
+```
+and 
+```
+__C.TRAIN.HAS_RPN = True
+__C.TEST.HAS_RPN = True
+```
+
+
