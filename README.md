@@ -279,14 +279,7 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
 
 ### Training
-#### RPN
 
-
-```
-./tools/rpn_generate.py --gpu 0 --net data/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel --def models/VGG_CNN_M_1024/faster_rcnn_end2end/train.prototxt --imdb try1_train
-
-./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --imdb try1_train
-```
 
 #### RPN + Fast RCNN
 In the directory **$FRCNN_ROOT**, run the following command in the shell.
@@ -304,6 +297,12 @@ Be careful with the **imdb** argument as it specifies the dataset you will train
 
 
 #### Other
+```
+./tools/rpn_generate.py --gpu 0 --net data/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel --def models/VGG_CNN_M_1024/faster_rcnn_end2end/train.prototxt --imdb try1_train
+
+./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --imdb try1_train
+```
+
 To use RPN instead of selective search, modify the following flag in "lib/fast-rcnn/config.py":
 ```
 __C.TRAIN.PROPOSAL_METHOD = 'gt'
