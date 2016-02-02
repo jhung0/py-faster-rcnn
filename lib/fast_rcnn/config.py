@@ -9,7 +9,7 @@
 
 This file specifies default config options for Fast R-CNN. You should not
 change values in this file. Instead, you should write a config file (in yaml)
-and use cfg_from_file(yaml_file) to load it and override the default options.
+and use cfg_from_file(yaml_file), e.g. experiments/cfgs/faster_rcnn_alt_opt.yml, to load it and override the default options.
 
 Most tools in $ROOT/tools take a --cfg option to specify an override file.
     - See tools/{train,test}_net.py for example code that uses cfg_from_file()
