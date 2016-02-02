@@ -98,7 +98,7 @@ If you find Faster R-CNN useful in your research, please consider citing:
     #   http://caffe.berkeleyvision.org/installation.html
 
     # If you're experienced with Caffe and have all of the requirements installed
-    # and your Makefile.config in place (copy from Makefile.config.example and uncomment some lines?), then simply do:
+    # and your Makefile.config in place (copy from Makefile.config.example and uncomment WITH_PYTHON_LAYER := 1), then simply do:
     make -j8 && make pycaffe
     
     #if it doesn't work, try
