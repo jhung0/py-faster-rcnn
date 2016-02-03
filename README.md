@@ -200,6 +200,12 @@ cd $FRCN_ROOT
 VGG16 comes from the [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo), but is provided here for your convenience.
 ZF was trained at MSRA.
 
+*Note: this does not work when I try to use them in training, so I did
+```
+wget http://www.robots.ox.ac.uk/~vgg/software/deep_eval/releases/bvlc/VGG_CNN_M_1024.caffemodel
+```
+and moved the file to data/imagenet_models/
+
 ### Usage
 
 To train and test a Faster R-CNN detector using the **alternating optimization** algorithm from our NIPS 2015 paper, use `experiments/scripts/faster_rcnn_alt_opt.sh`.
@@ -273,7 +279,7 @@ Then you should modify the `factory.py` in the same directory.
 
 ### Modify Prototxt
 
-For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` in `$FRCNN_ROOTmodels/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
+For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` in `$FRCNN_ROOT/models/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
   - Modify `num_classes` to `C`;
   - Modify `num_output` in the `cls_score` layer to `C`
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
@@ -286,7 +292,7 @@ In the directory **$FRCNN_ROOT**, run the following command in the shell.
 
 ```sh
 ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
-    --weights data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel --imdb try1_train
+    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train
 ```
 Be careful with the **imdb** argument as it specifies the dataset you will train on. 
 
