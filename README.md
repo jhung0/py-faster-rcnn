@@ -261,7 +261,7 @@ Then you should modify the `factory.py` in the same directory.
 
 ### Modify Prototxt
 
-For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` or `stage1_fast_rcnn_train.pt`, `stage1_rpn_train.pt`, `stage2_fast_rcnn_train.pt`, `stage2_rpn_train.pt`, `faster_rcnn_test.pt`, and `rpn_test.pt` in `$FRCNN_ROOT/models/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
+For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` or `stage1_fast_rcnn_train.pt`, `stage1_rpn_train.pt`, `stage2_fast_rcnn_train.pt`, `stage2_rpn_train.pt`, and `faster_rcnn_test.pt` in `$FRCNN_ROOT/models/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
   - Modify `num_classes` to `C`;
   - Modify `num_output` in the `cls_score` layer to `C`
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
