@@ -273,19 +273,23 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
 In the directory **$FRCNN_ROOT**, run the following command in the shell.
 
 ```sh
-time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
     --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --set TRAIN.SCALES [224]
 ```
 or 
 ```sh
-time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
     --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
 ```
 - Be careful with the **imdb** argument as it specifies the dataset you will train on. 
 - **Empty annotation files are NOT OK**. 
 - To change the number of iterations, go to tools/train_faster_rcnn_alt_opt.py and the function get_solvers
 
-
+### Testing
+```sh
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_alt_opt/faster_rcnn_test.pt \
+    --net output/default/train/VGG_CNN_M_1024_faster_rcnn_final.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
+```
 
 
 
