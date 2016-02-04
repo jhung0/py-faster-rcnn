@@ -181,8 +181,7 @@ Pre-trained ImageNet models can be downloaded for the three networks described i
 cd $FRCN_ROOT
 ./data/scripts/fetch_imagenet_models.sh
 ```
-VGG16 comes from the [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo), but is provided here for your convenience.
-ZF was trained at MSRA.
+VGG16 comes from the [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo). ZF was trained at MSRA.
 
 *Note: this does not work when I try to use them in training, so I did
 ```
@@ -249,7 +248,6 @@ crop_000011
 crop_000603
 crop_000606
 crop_000607
-crop_000608
 ```
 ### Construct IMDB
 
@@ -276,9 +274,16 @@ In the directory **$FRCNN_ROOT**, run the following command in the shell.
 
 ```sh
 ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
-    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train
+    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --set TRAIN.SCALES [224]
 ```
-Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+or 
+```sh
+./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
+```
+-Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+-**Empty annotation files are NOT OK**. 
+-To change the number of iterations, go to tools/train_faster_rcnn_alt_opt.py and the function get_solvers
 
 
 
