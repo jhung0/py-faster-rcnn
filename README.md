@@ -273,12 +273,12 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
 In the directory **$FRCNN_ROOT**, run the following command in the shell.
 
 ```sh
-./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
     --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --set TRAIN.SCALES [224]
 ```
 or 
 ```sh
-./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
     --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
 ```
 - Be careful with the **imdb** argument as it specifies the dataset you will train on. 
