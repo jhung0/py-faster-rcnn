@@ -98,7 +98,7 @@ If you find Faster R-CNN useful in your research, please consider citing:
     #   http://caffe.berkeleyvision.org/installation.html
 
     # If you're experienced with Caffe and have all of the requirements installed
-    # and your Makefile.config in place (copy from Makefile.config.example and uncomment some lines?), then simply do:
+    # and your Makefile.config in place (copy from Makefile.config.example and uncomment WITH_PYTHON_LAYER := 1), then simply do:
     make -j8 && make pycaffe
     
     #if it doesn't work, try
@@ -149,13 +149,6 @@ It worked using a GPU on AWS (https://github.com/rbgirshick/py-faster-rcnn/issue
 
 ### Beyond the demo: installation for training and testing models
 1. Download the training, validation, test data and VOCdevkit
-
-	```Shell
-	wget http://pascallin.ecs.soton.ac.uk/challenges/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
-	wget http://pascallin.ecs.soton.ac.uk/challenges/VOC/voc2007/VOCtest_06-Nov-2007.tar
-	wget http://pascallin.ecs.soton.ac.uk/challenges/VOC/voc2007/VOCdevkit_08-Jun-2007.tar
-	```
-	or
 	```Shell
 	wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
 	wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
@@ -178,15 +171,6 @@ It worked using a GPU on AWS (https://github.com/rbgirshick/py-faster-rcnn/issue
   	$VOCdevkit/VOC2007                    # image sets, annotations, etc.
   	# ... and several other directories ...
   	```
-
-4. Create symlinks for the PASCAL VOC dataset
-
-	```Shell
-    cd $FRCN_ROOT/data
-    ln -s $VOCdevkit VOCdevkit2007
-    ```
-    Using symlinks is a good idea because you will likely want to share the same PASCAL dataset installation between multiple projects.
-5. [Optional] follow similar steps to get PASCAL VOC 2010 and 2012
 6. Follow the next sections to download pre-trained ImageNet models
 
 ### Download pre-trained ImageNet models
@@ -197,8 +181,13 @@ Pre-trained ImageNet models can be downloaded for the three networks described i
 cd $FRCN_ROOT
 ./data/scripts/fetch_imagenet_models.sh
 ```
-VGG16 comes from the [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo), but is provided here for your convenience.
-ZF was trained at MSRA.
+VGG16 comes from the [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo). ZF was trained at MSRA.
+
+*Note: this does not work when I try to use them in training, so I did
+```
+wget http://www.robots.ox.ac.uk/~vgg/software/deep_eval/releases/bvlc/VGG_CNN_M_1024.caffemodel
+```
+and moved the file to data/imagenet_models/
 
 ### Usage
 
@@ -259,7 +248,6 @@ crop_000011
 crop_000603
 crop_000606
 crop_000607
-crop_000608
 ```
 ### Construct IMDB
 
@@ -273,7 +261,7 @@ Then you should modify the `factory.py` in the same directory.
 
 ### Modify Prototxt
 
-For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` in `$FRCNN_ROOTmodels/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
+For example, if you want to use the model **VGG_CNN_M_1024**, then you should modify `train.prototxt` or `stage1_fast_rcnn_train.pt`, `stage1_rpn_train.pt`, `stage2_fast_rcnn_train.pt`, `stage2_rpn_train.pt`, and `faster_rcnn_test.pt` in `$FRCNN_ROOT/models/VGG_CNN_M_1024`, it mainly concerns with the number of classes you want to train. Let's assume that the number of classes is `C (do not forget to count the `background` class). Then you should 
   - Modify `num_classes` to `C`;
   - Modify `num_output` in the `cls_score` layer to `C`
   - Modify `num_output` in the `bbox_pred` layer to `4 * C`
@@ -285,12 +273,23 @@ For example, if you want to use the model **VGG_CNN_M_1024**, then you should mo
 In the directory **$FRCNN_ROOT**, run the following command in the shell.
 
 ```sh
-./tools/train_faster_rcnn_alt_opt.py --gpu 0 --solver models/VGG_CNN_M_1024/solver.prototxt \
-    --weights data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel --imdb try1_train
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
+    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --set TRAIN.SCALES [224]
 ```
-Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+or 
+```sh
+time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
+    --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
+```
+- Be careful with the **imdb** argument as it specifies the dataset you will train on. 
+- **Empty annotation files are NOT OK**. 
+- To change the number of iterations, go to tools/train_faster_rcnn_alt_opt.py and the function get_solvers
 
-
+### Testing
+```sh
+time ./tools/test_net.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_alt_opt/faster_rcnn_test.pt \
+    --net output/default/train/VGG_CNN_M_1024_faster_rcnn_final.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
+```
 
 
 
