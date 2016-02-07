@@ -273,7 +273,6 @@ class try1(datasets.imdb):
 	recall = []
 	prec = []
 	ap = 0 #average precision?
-	ap_auc = 0
 	path = os.path.join(self._devkit_path, 'results', self.name, str(os.getpid()))
         #get ground truth
 	gt = []
@@ -284,12 +283,13 @@ class try1(datasets.imdb):
 	results_CLS_index = results_CLS['index']
 	results_CLS_boxes = results_CLS['boxes']
 	results_CLS_prob = results_CLS['class_probs']
-	
+	npos = 0	
 	for i, index in enumerate(self.image_index):
 	    gt.append(self._load_try1_annotation(index))
 	    gt[i]['index'] = index
 	    gt[i]['det'] = np.zeros(len(gt[i]['gt_classes'])) 
-	
+	    npos = npos + sum(1 - gt[i]['difficult'])
+
 	#sort detections by decreasing confidence
 	sorted_ids = np.argsort(-np.array(results_CLS_prob))
 	results_CLS_index = [results_CLS_index[i] for i in sorted_ids]
@@ -331,19 +331,30 @@ class try1(datasets.imdb):
 		    tp.append(0)
 		    fp.append(1)
 	#compute precision and recall
-	npos = sum(1 - gt_i['difficult'])
 	fp = np.cumsum(fp)
 	tp = np.cumsum(tp)
 	rec = tp*1.0/npos
 	prec = tp*1.0/(fp+tp)
 
-	#compute average precision/recall
+	#compute average precision
 	for t in np.linspace(0, 1.0, endpoint=True, num=11):
-	    p = np.max(prec[rec>=t])
-	    if p.size == 0:
+	    try:
+		p = np.max(prec[rec>=t])
+	    except:
 		p = 0
 	    ap = ap + p*1.0/11	
-	print '!!! %s ap ap_auc: %.4f %.4f\n'%(cls, ap, ap_auc)
+	return rec, prec, ap
+
+    def calculate_auc(self, recall, prec):
+	mrec = [0] + recall + [1]
+	mrec = np.array(mrec)
+	mpre = [0] + prec + [0]
+	mpre = np.array(mpre)
+	for i in np.arange(len(mpre)-2, -1, -1):
+	    mpre[i] = max(mpre[i], mpre[i+1])
+	i = np.where(mrec[1:] != mrec[:-1])[0]
+	ap = sum((mrec[i+1] - mrec[i])*mpre[i+1])
+	return ap
 
     def evaluate_detections(self, all_boxes, output_dir):
         #MATLAB evaluation
@@ -351,10 +362,22 @@ class try1(datasets.imdb):
         #self._do_matlab_eval(comp_id, output_dir)
 	
 	#PYTHON evaluation
+	recalls = []
+	precs = []
+	aps = []
+	ap_aucs = []
 	results = self._write_try1_results_file(all_boxes)
 	for cls in self._classes:
-	    self._do_python_eval(results, cls, output_dir, 0.5)
-
+	    if cls != '__background__':
+		print cls
+		recall, prec, ap = self._do_python_eval(results, cls, output_dir, 0.5)
+	    	ap_auc = self.calculate_auc(recall, prec)
+		recalls.append(recall)
+		precs.append(prec)
+		aps.append(ap)
+		ap_aucs.append(ap_auc)
+		print recall, prec, ap, ap_auc	
+		
     def competition_mode(self, on):
         if on:
             self.config['use_salt'] = False
