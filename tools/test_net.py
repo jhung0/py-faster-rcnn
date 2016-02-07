@@ -81,5 +81,4 @@ if __name__ == '__main__':
     imdb.competition_mode(args.comp_mode)
     if not cfg.TEST.HAS_RPN:
         imdb.set_proposal_method(cfg.TEST.PROPOSAL_METHOD)
-
     test_net(net, imdb)

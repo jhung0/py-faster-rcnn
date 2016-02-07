@@ -193,7 +193,7 @@ __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
 __C.EXP_DIR = 'default'
 
 # Use GPU implementation of non-maximum suppression
-__C.USE_GPU_NMS = True
+__C.USE_GPU_NMS = False#True
 
 # Default GPU device id
 __C.GPU_ID = 0
@@ -255,8 +255,11 @@ def cfg_from_list(cfg_list):
     """Set config keys via list (e.g., from command line)."""
     from ast import literal_eval
     assert len(cfg_list) % 2 == 0
+    print cfg_list
     for k, v in zip(cfg_list[0::2], cfg_list[1::2]):
-        key_list = k.split('.')
+        print k
+	print v
+	key_list = k.split('.')
         d = __C
         for subkey in key_list[:-1]:
             assert d.has_key(subkey)

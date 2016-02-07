@@ -77,7 +77,7 @@ def get_minibatch(roidb, num_classes):
             blobs['bbox_inside_weights'] = bbox_inside_blob
             blobs['bbox_outside_weights'] = \
                 np.array(bbox_inside_blob > 0).astype(np.float32)
-
+    #print blobs
     return blobs
 
 def _sample_rois(roidb, fg_rois_per_image, rois_per_image, num_classes):

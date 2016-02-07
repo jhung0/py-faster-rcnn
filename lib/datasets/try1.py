@@ -16,6 +16,7 @@ import scipy.io as sio
 import utils.cython_bbox
 import cPickle
 import subprocess
+from operator import itemgetter
 
 class try1(datasets.imdb):
     def __init__(self, image_set, devkit_path):
@@ -170,6 +171,7 @@ class try1(datasets.imdb):
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
 
+	difficult = np.zeros((num_objs), dtype=np.int32)
         # Load object bounding boxes into a data frame.
         for ix in range(num_objs):
             try:
@@ -183,11 +185,12 @@ class try1(datasets.imdb):
             overlaps[ix, cls] = 1.0
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
-
+	
         return {'boxes' : boxes,
                 'gt_classes': gt_classes,
                 'gt_overlaps' : overlaps,
-                'flipped' : False}
+                'flipped' : False,
+		'difficult' : difficult}
 
     def _write_try1_results_file(self, all_boxes):
         use_salt = self.config['use_salt']
@@ -196,24 +199,59 @@ class try1(datasets.imdb):
             comp_id += '-{}'.format(os.getpid())
 
         # VOCdevkit/results/VOC2007/Main/comp4-44503_det_test_aeroplane.txt
-        path = os.path.join(self._devkit_path, 'results', self.name, comp_id + '_')
+        path = os.path.join(self._devkit_path, 'results', self.name, str(os.getpid()))#, comp_id)
+	
+	results = []
         for cls_ind, cls in enumerate(self.classes):
+	    results.append({})
+	    results[cls_ind]['boxes'] = []
+	    results[cls_ind]['class_probs'] = []
+	    results[cls_ind]['index'] = []
+	    results[cls_ind]['class'] = cls
             if cls == '__background__':
                 continue
-            print 'Writing {} VOC results file'.format(cls)
-            filename = path + 'det_' + self._image_set + '_' + cls + '.txt'
-            with open(filename, 'wt') as f:
+            print 'Writing {} results file'.format(cls)
+            filename = path + '_det_' + self._image_set + '_' + cls + '.txt'
+            with open(filename, 'wt+') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
                     if dets == []:
                         continue
-                    # the VOCdevkit expects 1-based indices
                     for k in xrange(dets.shape[0]):
+			results[cls_ind]['index'].append(index)
+			results[cls_ind]['boxes'].append(dets[k, 0:4].tolist())
+			results[cls_ind]['class_probs'].append(dets[k, -1])
                         f.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.
                                 format(index, dets[k, -1],
-                                       dets[k, 0] + 1, dets[k, 1] + 1,
-                                       dets[k, 2] + 1, dets[k, 3] + 1))
-        return comp_id
+                                       dets[k, 0] , dets[k, 1] ,
+                                       dets[k, 2] , dets[k, 3] ))
+	'''
+	#proposals per image
+	results = []
+	for im_ind, index in enumerate(self.image_index):
+	    results.append({})
+	    results[im_ind]['boxes'] = []
+	    results[im_ind]['classes'] = []
+	    results[im_ind]['class_probs'] = []
+	    results[im_ind]['index'] = index
+	    filename = path + '_' + self._image_set + '_' + index + '.txt'
+	    print filename
+	    with open(filename, 'wt+') as f:
+		for cls_ind, cls in enumerate(self.classes):
+		    dets = all_boxes[cls_ind][im_ind]
+		    if dets == []:
+			continue
+		    for k in xrange(dets.shape[0]):
+			f.write('{:s} {:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.
+                                format(cls, dets[k, 0] , dets[k, 1],
+                                       dets[k, 2] , dets[k, 3], dets[k, -1] ))
+		    for i in xrange(dets.shape[0]):
+			results[im_ind]['boxes'].append(dets[i, 0:4].tolist()) 
+		        results[im_ind]['classes'].append(cls)
+		        results[im_ind]['class_probs'].append(dets[i, -1])
+	'''
+        #return comp_id
+	return results
 
     def _do_matlab_eval(self, comp_id, output_dir='output'):
         rm_results = self.config['cleanup']
@@ -229,9 +267,93 @@ class try1(datasets.imdb):
         print('Running:\n{}'.format(cmd))
         status = subprocess.call(cmd, shell=True)
 
+    def _do_python_eval(self, results, cls, output_dir='output', MINOVERLAP=0.5):
+	rm_results = self.config['cleanup']
+	print 'Running'
+	recall = []
+	prec = []
+	ap = 0 #average precision?
+	ap_auc = 0
+	path = os.path.join(self._devkit_path, 'results', self.name, str(os.getpid()))
+        #get ground truth
+	gt = []
+	tp = [] #true positives
+	fp = [] #false positives
+	
+	results_CLS = results[map(itemgetter('class'), results).index(cls)]
+	results_CLS_index = results_CLS['index']
+	results_CLS_boxes = results_CLS['boxes']
+	results_CLS_prob = results_CLS['class_probs']
+	
+	for i, index in enumerate(self.image_index):
+	    gt.append(self._load_try1_annotation(index))
+	    gt[i]['index'] = index
+	    gt[i]['det'] = np.zeros(len(gt[i]['gt_classes'])) 
+	
+	#sort detections by decreasing confidence
+	sorted_ids = np.argsort(-np.array(results_CLS_prob))
+	results_CLS_index = [results_CLS_index[i] for i in sorted_ids]
+	results_CLS_boxes = [results_CLS_boxes[i] for i in sorted_ids]
+	results_CLS_prob = [results_CLS_prob[i] for i in sorted_ids]
+	    
+	#assign detections to ground truth objects 
+	nd = len(results_CLS_index) #number of detections
+	for nproposal in xrange(nd):
+            _boxes = results_CLS_boxes[nproposal]
+            _class_prob = results_CLS_prob[nproposal]
+	    ov_max = -float("inf")
+	    index = results_CLS_index[nproposal]
+	    #assign detection to ground truth object if any
+	    gt_i = gt[map(itemgetter('index'), gt).index(index)]
+ 	    for ngt in xrange(len(gt_i['gt_classes'])):
+		gt_boxes = gt_i['boxes'][ngt]
+		gt_class = gt_i['gt_classes'][ngt]
+		iw = min(_boxes[2], gt_boxes[2]) - min(_boxes[0], gt_boxes[0]) + 1 
+		ih = max(_boxes[3], gt_boxes[3]) - max(_boxes[1], gt_boxes[1]) + 1
+		if iw > 0 and ih > 0:
+		    #compute overlap as area of intersection / area of union
+		    ua = (_boxes[2] - _boxes[0] + 1)*(_boxes[3] - _boxes[1] + 1) + (gt_boxes[2] - gt_boxes[0] + 1)*(gt_boxes[3] - gt_boxes[1] + 1) - iw*ih
+		    ov = iw*ih*1.0/ua
+		    if ov > ov_max:
+			ov_max = ov
+			ngt_max = ngt		
+	    	#assign detection as true positive/don't care/false positive
+	    	if ov_max >= MINOVERLAP:
+		    if not gt_i['difficult'][ngt_max]: 
+			if not gt_i['det'][ngt_max]:
+			    tp.append(1)
+			    fp.append(0)
+			    gt_i['det'][ngt_max] = 1 #true positive
+			else:
+			    tp.append(0)
+			    fp.append(1) #false positive (multiple detection)
+		else:
+		    tp.append(0)
+		    fp.append(1)
+	#compute precision and recall
+	npos = sum(1 - gt_i['difficult'])
+	fp = np.cumsum(fp)
+	tp = np.cumsum(tp)
+	rec = tp*1.0/npos
+	prec = tp*1.0/(fp+tp)
+
+	#compute average precision/recall
+	for t in np.linspace(0, 1.0, endpoint=True, num=11):
+	    p = np.max(prec[rec>=t])
+	    if p.size == 0:
+		p = 0
+	    ap = ap + p*1.0/11	
+	print '!!! %s ap ap_auc: %.4f %.4f\n'%(cls, ap, ap_auc)
+
     def evaluate_detections(self, all_boxes, output_dir):
-        comp_id = self._write_voc_results_file(all_boxes)
-        self._do_matlab_eval(comp_id, output_dir)
+        #MATLAB evaluation
+	#comp_id = self._write_try1_results_file(all_boxes)
+        #self._do_matlab_eval(comp_id, output_dir)
+	
+	#PYTHON evaluation
+	results = self._write_try1_results_file(all_boxes)
+	for cls in self._classes:
+	    self._do_python_eval(results, cls, output_dir, 0.5)
 
     def competition_mode(self, on):
         if on:
