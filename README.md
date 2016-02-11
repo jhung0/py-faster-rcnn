@@ -288,7 +288,7 @@ time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
 ### Testing
 ```sh
 time ./tools/test_net.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_alt_opt/faster_rcnn_test.pt \
-    --net output/default/train/VGG_CNN_M_1024_faster_rcnn_final.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
+    --net output/faster_rcnn_alt_opt/train/VGG_CNN_M_1024_faster_rcnn_final.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
 ```
 
 
