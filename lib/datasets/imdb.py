@@ -93,6 +93,7 @@ class imdb(object):
 
         all_boxes[class][image] = [] or np.array of shape #dets x 5
         """
+	print 'evaluate_detections'
         raise NotImplementedError
 
     def append_flipped_images(self):
@@ -100,15 +101,14 @@ class imdb(object):
         widths = [PIL.Image.open(self.image_path_at(i)).size[0]
                   for i in xrange(num_images)]
 	print 'num_images', num_images
-	print 'widths', widths
+	#print 'widths', widths
         for i in xrange(num_images):
             boxes = self.roidb[i]['boxes'].copy()
-	    print boxes
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
             boxes[:, 0] = widths[i] - oldx2 - 1
             boxes[:, 2] = widths[i] - oldx1 - 1
-	    print i, boxes[:,2], boxes[:,0]
+	    print boxes
             assert (boxes[:, 2] >= boxes[:, 0]).all()
             entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],

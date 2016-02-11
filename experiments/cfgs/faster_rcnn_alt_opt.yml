@@ -3,3 +3,4 @@ TRAIN:
   SCALES: [224]
 TEST:
   HAS_RPN: True
+  SCALES: [224]
