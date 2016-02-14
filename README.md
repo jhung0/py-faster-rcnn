@@ -281,7 +281,7 @@ or
 time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
     --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
 ```
-or for end2end
+or for end2end (default iters is 40000)
 ```sh
 time ./tools/train_net.py --gpu 0 --iters 1000 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_end2end.yml 
 ```
@@ -294,8 +294,10 @@ time ./tools/train_net.py --gpu 0 --iters 1000 --solver models/VGG_CNN_M_1024/fa
 time ./tools/test_net.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_alt_opt/faster_rcnn_test.pt \
     --net output/faster_rcnn_alt_opt/train/VGG_CNN_M_1024_faster_rcnn_final.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_alt_opt.yml
 ```
-
-
+or for end2end
+```sh
+time ./tools/test_net.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_end2end/test.prototxt --net output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_iter_1000.caffemodel --imdb try1_test --cfg experiments/cfgs/faster_rcnn_end2end.yml
+```
 
 
 
