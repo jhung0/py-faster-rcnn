@@ -212,6 +212,7 @@ class try1(datasets.imdb):
                 continue
             print 'Writing {} results file'.format(cls)
             filename = path + '_det_' + self._image_set + '_' + cls + '.txt'
+	    print filename
             with open(filename, 'wt+') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -274,7 +275,6 @@ class try1(datasets.imdb):
 	prec = []
 	ap = 0 #average precision?
 	path = os.path.join(self._devkit_path, 'results', self.name, str(os.getpid()))
-        #get ground truth
 	gt = []
 	tp = [] #true positives
 	fp = [] #false positives
@@ -283,33 +283,48 @@ class try1(datasets.imdb):
 	results_CLS_index = results_CLS['index']
 	results_CLS_boxes = results_CLS['boxes']
 	results_CLS_prob = results_CLS['class_probs']
-	npos = 0	
+	
+	#sort detections by decreasing confidence
+        sorted_ids = np.argsort(-np.array(results_CLS_prob))
+        results_CLS_index = [results_CLS_index[i] for i in sorted_ids]
+        results_CLS_boxes = [results_CLS_boxes[i] for i in sorted_ids]
+        results_CLS_prob = [results_CLS_prob[i] for i in sorted_ids]
+
+	npos = 0
+	#extract ground truth	
 	for i, index in enumerate(self.image_index):
 	    gt.append(self._load_try1_annotation(index))
+	    #filter out objects not in class
+	    cls_indices = np.where(gt[i]['gt_classes'] == self.classes.index(cls))[0]
+	    for key in gt[i]:
+		try:
+		    gt[i][key] = gt[i][key][cls_indices]
+		except:
+		    pass
 	    gt[i]['index'] = index
 	    gt[i]['det'] = np.zeros(len(gt[i]['gt_classes'])) 
 	    npos = npos + sum(1 - gt[i]['difficult'])
 
-	#sort detections by decreasing confidence
-	sorted_ids = np.argsort(-np.array(results_CLS_prob))
-	results_CLS_index = [results_CLS_index[i] for i in sorted_ids]
-	results_CLS_boxes = [results_CLS_boxes[i] for i in sorted_ids]
-	results_CLS_prob = [results_CLS_prob[i] for i in sorted_ids]
-	    
-	#assign detections to ground truth objects 
+	#for each detection  
 	nd = len(results_CLS_index) #number of detections
 	for nproposal in xrange(nd):
+	    #print 'nproposal', nproposal
             _boxes = results_CLS_boxes[nproposal]
             _class_prob = results_CLS_prob[nproposal]
 	    ov_max = -float("inf")
 	    index = results_CLS_index[nproposal]
 	    #assign detection to ground truth object if any
 	    gt_i = gt[map(itemgetter('index'), gt).index(index)]
+	    #print 'index', index
+	    #print 'gt_i', gt_i
+	    #print _boxes
  	    for ngt in xrange(len(gt_i['gt_classes'])):
+		#print 'ngt', ngt
 		gt_boxes = gt_i['boxes'][ngt]
-		gt_class = gt_i['gt_classes'][ngt]
-		iw = min(_boxes[2], gt_boxes[2]) - min(_boxes[0], gt_boxes[0]) + 1 
-		ih = max(_boxes[3], gt_boxes[3]) - max(_boxes[1], gt_boxes[1]) + 1
+		#print gt_boxes
+		iw = min(_boxes[2], gt_boxes[2]) - max(_boxes[0], gt_boxes[0]) + 1 
+		ih = min(_boxes[3], gt_boxes[3]) - max(_boxes[1], gt_boxes[1]) + 1
+		#print 'iw, ih', iw, ih
 		if iw > 0 and ih > 0:
 		    #compute overlap as area of intersection / area of union
 		    ua = (_boxes[2] - _boxes[0] + 1)*(_boxes[3] - _boxes[1] + 1) + (gt_boxes[2] - gt_boxes[0] + 1)*(gt_boxes[3] - gt_boxes[1] + 1) - iw*ih
@@ -317,19 +332,21 @@ class try1(datasets.imdb):
 		    if ov > ov_max:
 			ov_max = ov
 			ngt_max = ngt		
-	    	#assign detection as true positive/don't care/false positive
-	    	if ov_max >= MINOVERLAP:
-		    if not gt_i['difficult'][ngt_max]: 
-			if not gt_i['det'][ngt_max]:
-			    tp.append(1)
-			    fp.append(0)
-			    gt_i['det'][ngt_max] = 1 #true positive
-			else:
-			    tp.append(0)
-			    fp.append(1) #false positive (multiple detection)
-		else:
-		    tp.append(0)
-		    fp.append(1)
+	    #assign detection as true positive/don't care/false positive
+	    if ov_max >= MINOVERLAP:
+		#print ov_max
+		if not gt_i['difficult'][ngt_max]: 
+		    if not gt_i['det'][ngt_max]:
+			tp.append(1)
+			fp.append(0)
+			gt_i['det'][ngt_max] = 1 #true positive
+			#print gt_boxes
+		    else:
+			tp.append(0)
+			fp.append(1) #false positive (multiple detection)
+	    else:
+		tp.append(0)
+		fp.append(1)
 	#compute precision and recall
 	fp = np.cumsum(fp)
 	tp = np.cumsum(tp)
@@ -356,7 +373,7 @@ class try1(datasets.imdb):
 	ap = sum((mrec[i+1] - mrec[i])*mpre[i+1])
 	return ap
 
-    def evaluate_detections(self, all_boxes, output_dir):
+    def evaluate_detections(self, all_boxes, output_dir ):
         #MATLAB evaluation
 	#comp_id = self._write_try1_results_file(all_boxes)
         #self._do_matlab_eval(comp_id, output_dir)
@@ -366,7 +383,7 @@ class try1(datasets.imdb):
 	precs = []
 	aps = []
 	ap_aucs = []
-	results = self._write_try1_results_file(all_boxes)
+	results = self._write_try1_results_file(all_boxes )
 	for cls in self._classes:
 	    if cls != '__background__':
 		print cls
@@ -376,7 +393,7 @@ class try1(datasets.imdb):
 		precs.append(prec)
 		aps.append(ap)
 		ap_aucs.append(ap_auc)
-		print recall, prec, ap, ap_auc	
+		print 'avg precision',ap, ap_auc	
 		
     def competition_mode(self, on):
         if on:
