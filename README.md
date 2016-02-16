@@ -283,7 +283,7 @@ time ./tools/train_faster_rcnn_alt_opt.py --gpu 0 --net_name VGG_CNN_M_1024 \
 ```
 or for end2end (default iters is 40000)
 ```sh
-time ./tools/train_net.py --gpu 0 --iters 1000 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_end2end.yml 
+time ./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --weights data/imagenet_models/VGG_CNN_M_1024.caffemodel --imdb try1_train --cfg experiments/cfgs/faster_rcnn_end2end.yml --iters 1000 
 ```
 - Be careful with the **imdb** argument as it specifies the dataset you will train on. 
 - **Empty annotation files are NOT OK**. 
