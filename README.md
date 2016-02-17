@@ -301,22 +301,3 @@ time ./tools/test_net.py --gpu 0 --def models/VGG_CNN_M_1024/faster_rcnn_end2end
 
 
 
-#### Other
-```
-./tools/rpn_generate.py --gpu 0 --net data/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel --def models/VGG_CNN_M_1024/faster_rcnn_end2end/train.prototxt --imdb try1_train
-
-./tools/train_net.py --gpu 0 --solver models/VGG_CNN_M_1024/faster_rcnn_end2end/solver.prototxt --imdb try1_train
-```
-
-To use RPN instead of selective search, modify the following flag in "experiments/cfgs/faster_rcnn_alt_opt.yml" not in "lib/fast-rcnn/config.py":
-```
-__C.TRAIN.PROPOSAL_METHOD = 'gt'
-__C.TEST.PROPOSAL_METHOD = 'gt'
-```
-and 
-```
-__C.TRAIN.HAS_RPN = True
-__C.TEST.HAS_RPN = True
-```
-
-
