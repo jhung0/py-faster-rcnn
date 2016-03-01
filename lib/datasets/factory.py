@@ -39,7 +39,8 @@ for top_k in np.arange(1000, 11000, 1000):
                     _selective_search_IJCV_top_k(split, year, top_k))
 
 # Set up _<split> using selective search "fast" mode
-devkit_path = '/home/ubuntu/try1'
+#devkit_path = '/home/ubuntu/try1'
+devkit_path = '/opt/try1'
 for split in ['train', 'test']:
     name = '{}_{}'.format('try1', split)
     __sets[name] = (lambda split=split: datasets.try1.try1(split, devkit_path))

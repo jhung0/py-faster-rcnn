@@ -58,6 +58,7 @@ If you find Faster R-CNN useful in your research, please consider citing:
   ```
 
   You can download my [Makefile.config](http://www.cs.berkeley.edu/~rbg/fast-rcnn-data/Makefile.config) for reference.
+```/opt/caffe/python$ pip install -r requirements.txt ```
 
 2. Python packages you might not have: `cython` (pip), `python-opencv` (sudo apt-get install python-opencv), `easydict` (pip)
 3. [optional] MATLAB (required for PASCAL VOC evaluation only)
