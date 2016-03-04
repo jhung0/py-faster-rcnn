@@ -92,8 +92,23 @@ def im_proposals(net, im):
             im_info=blobs['im_info'].astype(np.float32, copy=False))
 
     scale = blobs['im_info'][0, 2]
-    boxes = blobs_out['rois'][:, 1:].copy() / scale
-    scores = blobs_out['scores'].copy()
+    print net.blobs
+    print net.blobs['rois'].data.copy().shape
+    #print net.blobs['rpn_cls_prob'].data.copy().shape
+    #print net.blobs['rpn_cls_score'].data.copy().shape
+    #print net.blobs['rpn_cls_prob_reshape'].data.copy().shape
+    #print net.blobs['rpn_cls_score_reshape'].data.copy().shape
+    #print net.blobs['rpn_bbox_pred'].data.copy().shape
+    print net.blobs['cls_prob'].data.copy().shape
+    print net.blobs['rois'].data.copy()
+    print net.blobs['cls_prob'].data.copy()
+    print blobs_out
+    #boxes = blobs_out['rois'][:, 1:].copy() / scale
+    #boxes = blobs_out['bbox_pred'][:, :].copy()/scale
+    #scores = blobs_out['scores'].copy()
+    #scores = blobs_out['cls_prob'].copy()
+    boxes = net.blobs['rois'].data.copy()[:, 1:]/scale
+    scores = net.blobs['cls_prob'].data.copy()
     return boxes, scores
 
 def imdb_proposals(net, imdb):
@@ -101,10 +116,11 @@ def imdb_proposals(net, imdb):
 
     _t = Timer()
     imdb_boxes = [[] for _ in xrange(imdb.num_images)]
+    imdb_scores = [[] for _ in xrange(imdb.num_images)]
     for i in xrange(imdb.num_images):
         im = cv2.imread(imdb.image_path_at(i))
         _t.tic()
-        imdb_boxes[i], scores = im_proposals(net, im)
+        imdb_boxes[i], imdb_scores[i] = im_proposals(net, im)
         _t.toc()
         print 'im_proposals: {:d}/{:d} {:.3f}s' \
               .format(i + 1, imdb.num_images, _t.average_time)
@@ -114,4 +130,4 @@ def imdb_proposals(net, imdb):
             _vis_proposals(im, dets[:3, :], thresh=0.9)
             plt.show()
 
-    return imdb_boxes
+    return imdb_boxes, imdb_scores

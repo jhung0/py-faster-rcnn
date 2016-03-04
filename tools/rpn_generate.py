@@ -82,7 +82,7 @@ if __name__ == '__main__':
     net.name = os.path.splitext(os.path.basename(args.caffemodel))[0]
 
     imdb = get_imdb(args.imdb_name)
-    imdb_boxes = imdb_proposals(net, imdb)
+    imdb_boxes, imdb_scores = imdb_proposals(net, imdb)
 
     # output_dir = os.path.dirname(args.caffemodel)
     output_dir = get_output_dir(imdb, net)
@@ -91,5 +91,5 @@ if __name__ == '__main__':
 
     rpn_file = os.path.join(output_dir, net.name + '_rpn_proposals.pkl')
     with open(rpn_file, 'wb') as f:
-        cPickle.dump(imdb_boxes, f, cPickle.HIGHEST_PROTOCOL)
+        cPickle.dump([imdb_boxes, imdb_scores], f, cPickle.HIGHEST_PROTOCOL)
     print 'Wrote RPN proposals to {}'.format(rpn_file)

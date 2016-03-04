@@ -270,7 +270,6 @@ class try1(datasets.imdb):
 
     def _do_python_eval(self, results, cls, output_dir='output', MINOVERLAP=0.5):
 	rm_results = self.config['cleanup']
-	print 'Running'
 	recall = []
 	prec = []
 	ap = 0 #average precision?
@@ -360,7 +359,7 @@ class try1(datasets.imdb):
 	    except:
 		p = 0
 	    ap = ap + p*1.0/11	
-	return rec, prec, ap
+	return rec, prec, ap, results_CLS_prob
 
     def calculate_auc(self, recall, prec):
 	mrec = [0] + recall + [1]
@@ -387,14 +386,16 @@ class try1(datasets.imdb):
 	for cls in self._classes:
 	    if cls != '__background__':
 		print cls
-		recall, prec, ap = self._do_python_eval(results, cls, output_dir, 0.5)
+		recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
 	    	ap_auc = self.calculate_auc(recall, prec)
 		recalls.append(recall)
 		precs.append(prec)
 		aps.append(ap)
 		ap_aucs.append(ap_auc)
-		print 'avg precision',ap, ap_auc	
-		
+		print 'avg precision',ap, ap_auc
+		with open(os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl'), 'w') as f:
+            		cPickle.dump({'rec': recall, 'prec': prec, 'ap': ap, 'thresh':thresh}, f)
+	
     def competition_mode(self, on):
         if on:
             self.config['use_salt'] = False
