@@ -175,7 +175,7 @@ class try1(datasets.imdb):
         # Load object bounding boxes into a data frame.
         for ix in range(num_objs):
             try:
-                x1, y1, x2, y2, cls = data[ix].strip().split(' ')
+                x1, y1, x2, y2, cls, df = data[ix].strip().split(' ')
             except:
                 raise Exception('Error in reading data, line %s:%s'%(str(ix+1), data[ix]))
             #pixel indexes 0-based
@@ -183,6 +183,7 @@ class try1(datasets.imdb):
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
             overlaps[ix, cls] = 1.0
+	    difficult[ix] = df == 'True' 
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
 	
@@ -228,30 +229,39 @@ class try1(datasets.imdb):
                                        dets[k, 2] , dets[k, 3] ))
 	'''
 	#proposals per image
-	results = []
+	results2 = []
+	filename = path + '_det_' + self._image_set + '.pkl'
 	for im_ind, index in enumerate(self.image_index):
-	    results.append({})
-	    results[im_ind]['boxes'] = []
-	    results[im_ind]['classes'] = []
-	    results[im_ind]['class_probs'] = []
-	    results[im_ind]['index'] = index
-	    filename = path + '_' + self._image_set + '_' + index + '.txt'
-	    print filename
-	    with open(filename, 'wt+') as f:
-		for cls_ind, cls in enumerate(self.classes):
+	    results2.append({})
+	    results2[im_ind]['boxes'] = {} #[]
+	    #results2[im_ind]['classes'] = []
+	    #results2[im_ind]['class_probs'] = []
+	    results2[im_ind]['index'] = index
+	    #filename = path + '_det_' + self._image_set + '_' + index + '.pkl'
+	    #print filename
+	    #with open(filename, 'wt+') as f:
+	    for cls_ind, cls in enumerate(self.classes):
 		    dets = all_boxes[cls_ind][im_ind]
 		    if dets == []:
 			continue
+		    '''
 		    for k in xrange(dets.shape[0]):
 			f.write('{:s} {:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.
                                 format(cls, dets[k, 0] , dets[k, 1],
                                        dets[k, 2] , dets[k, 3], dets[k, -1] ))
-		    for i in xrange(dets.shape[0]):
-			results[im_ind]['boxes'].append(dets[i, 0:4].tolist()) 
-		        results[im_ind]['classes'].append(cls)
-		        results[im_ind]['class_probs'].append(dets[i, -1])
-	'''
-        #return comp_id
+		    '''
+		    num_detections = dets.shape[0]
+		    print 'number of detections ', num_detections
+		    for i in xrange(num_detections):
+			box = tuple(dets[i, 0:4])
+			if box not in results2[im_ind]['boxes']:
+				results2[im_ind]['boxes'][box] = []
+			results2[im_ind]['boxes'][box].append((cls, dets[i, -1]))  
+		        #results2[im_ind]['classes'].append(cls)
+		        #results2[im_ind]['class_probs'].append(dets[i, -1])
+        with open(filename, 'wt+') as f:
+		cPickle.dump(results2, f)
+        '''
 	return results
 
     def _do_matlab_eval(self, comp_id, output_dir='output'):
