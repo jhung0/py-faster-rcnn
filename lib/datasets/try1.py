@@ -25,7 +25,7 @@ class try1(datasets.imdb):
         self._devkit_path = devkit_path
         self._data_path = os.path.join(self._devkit_path, 'data')
         self._classes = ('__background__', # always index 0
-                         'rbc', 'ring', 'gam', 'uncertain')
+                         'rbc', 'ring', 'gam')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = ['.jpg', '.tif']
         self._image_index = self._load_image_set_index()
@@ -244,12 +244,12 @@ class try1(datasets.imdb):
 		    dets = all_boxes[cls_ind][im_ind]
 		    if dets == []:
 			continue
-		    '''
+		    
 		    for k in xrange(dets.shape[0]):
 			f.write('{:s} {:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.
                                 format(cls, dets[k, 0] , dets[k, 1],
                                        dets[k, 2] , dets[k, 3], dets[k, -1] ))
-		    '''
+		    
 		    num_detections = dets.shape[0]
 		    print 'number of detections ', num_detections
 		    for i in xrange(num_detections):

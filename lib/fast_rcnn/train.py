@@ -116,10 +116,6 @@ class SolverWrapper(object):
 
 def get_training_roidb(imdb):
     """Returns a roidb (Region of Interest database) for use in training."""
-    if cfg.TRAIN.USE_ROTATED:
-	print 'Appending rotated training examples...'
-	imdb.append_rotated_images()
-	print 'done'
     if cfg.TRAIN.USE_FLIPPED:
         print 'Appending horizontally and vertically flipped training examples...'
         imdb.append_flipped_images()
