@@ -97,20 +97,46 @@ class imdb(object):
         raise NotImplementedError
 
     def append_flipped_images(self):
+	#rotate and flip
         num_images = self.num_images
         widths = [PIL.Image.open(self.image_path_at(i)).size[0]
                   for i in xrange(num_images)]
+	heights = [PIL.Image.open(self.image_path_at(i)).size[1]
+                  for i in xrange(num_images)]
 	print 'num_images', num_images
 	#print 'widths', widths
+	#rotate
+	for i in xrange(num_images):
+	    boxes90 = self.roidb[i]['boxes'].copy()
+	    oldx1 = boxes90[:, 0].copy()
+            oldx2 = boxes90[:, 2].copy()
+	    oldy1 = boxes90[:, 1].copy()
+	    oldy2 = boxes90[:, 3].copy()
+	    
+	    boxes90[]
+	    assert (boxes90[:,2] >= boxes90[:,0]).all()
+	    assert (boxes90[:,3] >= boxes90[:,1]).all()
+	    entry = {'boxes' : boxes1,
+                     'gt_overlaps' : self.roidb[i]['gt_overlaps'],
+                     'gt_classes' : self.roidb[i]['gt_classes'],
+                     'rotate90' : True}
+            self.roidb.append(entry)
+	self._image_index = self._image_index * 2 
+	num_images = self.num_images
+	print 'num_images', num_images
+	widths = [PIL.Image.open(self.image_path_at(i)).size[0]
+                  for i in xrange(num_images)] 
+	#flip
         for i in xrange(num_images):
             boxes = self.roidb[i]['boxes'].copy()
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
+
             boxes[:, 0] = widths[i] - oldx2 - 1
             boxes[:, 2] = widths[i] - oldx1 - 1
-	    print boxes
+	    #print boxes
             assert (boxes[:, 2] >= boxes[:, 0]).all()
-            entry = {'boxes' : boxes,
+            entry = {'boxes' : boxes1,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
                      'gt_classes' : self.roidb[i]['gt_classes'],
                      'flipped' : True}
@@ -186,6 +212,7 @@ class imdb(object):
                           'gt_classes' : np.zeros((num_boxes,),
                                                   dtype=np.int32),
                           'gt_overlaps' : overlaps,
+			  'rotate90' : False
                           'flipped' : False})
         return roidb
 
