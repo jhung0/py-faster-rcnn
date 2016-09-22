@@ -25,7 +25,7 @@ class try1(datasets.imdb):
         self._devkit_path = devkit_path
         self._data_path = os.path.join(self._devkit_path, 'data')
         self._classes = ('__background__', # always index 0
-                         'rbc', 'ring', 'gam')
+                         'rbc', 'tro', 'sch', 'ring', 'gam', 'leu')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = ['.jpg', '.tif']
         self._image_index = self._load_image_set_index()
@@ -166,12 +166,17 @@ class try1(datasets.imdb):
         filename = os.path.join(self._data_path, 'Annotations', index + '.txt')
         with open(filename) as f:
             data = f.readlines() #each row is an element in a list
-        num_objs = len(data)
+	if not self.config['use_diff']:
+            non_diff_objs = [data[ix] for ix in range(len(deta)) if data[ix].strip().split(' ')[-1] != 'True']
+	    if len(non_diff_objs) != len(data):
+		print 'Removed {} difficult objects'.format(len(data)-len(non_diff_objs))
+	    data = non_diff_objs
+	num_objs = len(data)
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
+	#difficult = np.zeros((num_objs), dtype=np.int32)
 
-	difficult = np.zeros((num_objs), dtype=np.int32)
         # Load object bounding boxes into a data frame.
         for ix in range(num_objs):
             try:
@@ -183,15 +188,14 @@ class try1(datasets.imdb):
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
             overlaps[ix, cls] = 1.0
-	    difficult[ix] = df == 'True' 
+	    #difficult[ix] = df == 'True' 
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
 	
         return {'boxes' : boxes,
                 'gt_classes': gt_classes,
                 'gt_overlaps' : overlaps,
-                'flipped' : False,
-		'difficult' : difficult}
+                'flipped' : False}
 
     def _write_try1_results_file(self, all_boxes):
         use_salt = self.config['use_salt']
@@ -393,7 +397,8 @@ class try1(datasets.imdb):
 	aps = []
 	ap_aucs = []
 	results = self._write_try1_results_file(all_boxes )
-	for cls in self._classes:
+	try:
+	  for cls in self._classes:
 	    if cls != '__background__':
 		print cls
 		recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
@@ -405,7 +410,9 @@ class try1(datasets.imdb):
 		print 'avg precision',ap, ap_auc
 		with open(os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl'), 'w') as f:
             		cPickle.dump({'rec': recall, 'prec': prec, 'ap': ap, 'thresh':thresh}, f)
-	
+	except:
+	   print 'no evaluation'
+
     def competition_mode(self, on):
         if on:
             self.config['use_salt'] = False

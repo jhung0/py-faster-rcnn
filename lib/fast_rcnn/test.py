@@ -217,6 +217,7 @@ def apply_nms(all_boxes, thresh):
             if dets == []:
                 continue
             keep = nms(dets, thresh)
+	    print 'keep', len(keep)
             if len(keep) == 0:
                 continue
             nms_boxes[cls_ind][im_ind] = dets[keep, :].copy()
@@ -225,11 +226,11 @@ def apply_nms(all_boxes, thresh):
 def test_net(net, imdb):
     """Test a Fast R-CNN network on an image database."""
     num_images = len(imdb.image_index)
-    # heuristic: keep an average of 40 detections per class per images prior
+    # heuristic: keep an average of x detections per class per images prior
     # to NMS
-    max_per_set = 100 * num_images
-    # heuristic: keep at most 100 detection per class per image prior to NMS
-    max_per_image = 200
+    max_per_set = 300 * num_images
+    # heuristic: keep at most x detection per class per image prior to NMS
+    max_per_image = 3000
     # detection thresold for each class (this is adaptively set based on the
     # max_per_set constraint)
     thresh = -np.inf * np.ones(imdb.num_classes)
@@ -302,9 +303,11 @@ def test_net(net, imdb):
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
-    print len(all_boxes[0][0]), len(all_boxes[0][1]), len(all_boxes[1][0]), len(all_boxes[1][1]), len(all_boxes[2][0]), len(all_boxes[2][1])
+    #print len(all_boxes[0][0]), len(all_boxes[0][1]), len(all_boxes[1][0]), len(all_boxes[1][1]), len(all_boxes[2][0]), len(all_boxes[2][1])
     print 'Applying NMS to all detections'
     nms_dets = apply_nms(all_boxes, cfg.TEST.NMS)
-    print len(nms_dets[0][0]), len(nms_dets[0][1]), len(nms_dets[1][0]), len(nms_dets[1][1]), len(nms_dets[2][0]), len(nms_dets[2][1])
+    with open(det_file, 'wb') as f:
+	cPickle.dump(nms_dets, f, cPickle.HIGHEST_PROTOCOL)
+    #print len(nms_dets[0][0]), len(nms_dets[0][1]), len(nms_dets[1][0]), len(nms_dets[1][1]), len(nms_dets[2][0]), len(nms_dets[2][1])
     print 'Evaluating detections'
     imdb.evaluate_detections(nms_dets, output_dir)

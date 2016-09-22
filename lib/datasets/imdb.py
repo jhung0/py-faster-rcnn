@@ -97,20 +97,20 @@ class imdb(object):
         raise NotImplementedError
 
     def append_flipped_images(self):
-        widths = [PIL.Image.open(self.image_path_at(i)).size[0]
-                  for i in xrange(num_images)]
+        widths = [PIL.Image.open(self.image_path_at(i)).size[0] for i in xrange(self.num_images)]
 	#print 'widths', widths
 	#flip
-        for i in xrange(num_images):
+        for i in xrange(self.num_images):
             boxes = self.roidb[i]['boxes'].copy()
+	    print 'b', boxes
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
-
-            boxes[:, 0] = widths[i] - oldx2 - 1
-            boxes[:, 2] = widths[i] - oldx1 - 1
-	    #print boxes
+            boxes[:, 0] = [max([1, xmin])-1 for xmin in widths[i] - oldx2]
+            boxes[:, 2] = [min([widths[i], xmax])  for xmax in widths[i] - oldx1 - 1]
+	    print widths[i] - oldx2
+	    print boxes
             assert (boxes[:, 2] >= boxes[:, 0]).all()
-            entry = {'boxes' : boxes1,
+            entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
                      'gt_classes' : self.roidb[i]['gt_classes'],
                      'flipped' : True}
