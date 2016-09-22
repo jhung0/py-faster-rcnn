@@ -167,9 +167,8 @@ class try1(datasets.imdb):
         with open(filename) as f:
             data = f.readlines() #each row is an element in a list
 	if not self.config['use_diff']:
-            non_diff_objs = [data[ix] for ix in range(len(deta)) if data[ix].strip().split(' ')[-1] != 'True']
-	    if len(non_diff_objs) != len(data):
-		print 'Removed {} difficult objects'.format(len(data)-len(non_diff_objs))
+            non_diff_objs = [data[ix] for ix in range(len(data)) if data[ix].strip().split(' ')[-1] != 'True']
+	    #print 'Removed {} difficult objects'.format(len(data)-len(non_diff_objs))
 	    data = non_diff_objs
 	num_objs = len(data)
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
