@@ -60,7 +60,11 @@ If you find Faster R-CNN useful in your research, please consider citing:
   You can download my [Makefile.config](http://www.cs.berkeley.edu/~rbg/fast-rcnn-data/Makefile.config) for reference.
 ```/opt/caffe/python$ pip install -r requirements.txt ```
 
-2. Python packages you might not have: `cython` (pip), `python-opencv` (sudo apt-get install python-opencv), `easydict` (pip)
+2. Python packages you might not have: `cython` (pip), `python-opencv` (sudo apt-get install python-opencv), `easydict` (pip/pip2.7)
+When you can't do sudo, follow http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html but with
+```cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL
+_PREFIX=/home/jhung0/opencv/ .. ``` so then sudo in sudo make install is not necessary. Then add to pythonpath /home/jhung0/opencv/lib/python2.7/site-packages
+
 3. [optional] MATLAB (required for PASCAL VOC evaluation only)
 
 ### Requirements: hardware
