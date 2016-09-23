@@ -89,8 +89,9 @@ class try1(datasets.imdb):
             print '{} gt roidb loaded from {}'.format(self.name, cache_file)
             return roidb
 
-        gt_roidb = [self._load_try1_annotation(index)
-                    for index in self.image_index]
+        #gt_roidb = [self._load_try1_annotation(index) for index in self.image_index]
+	gt_roidb = filter(None, [self._load_try1_annotation(index)
+                    for index in self.image_index])
         with open(cache_file, 'wb') as fid:
             cPickle.dump(gt_roidb, fid, cPickle.HIGHEST_PROTOCOL)
         print 'wrote gt roidb to {}'.format(cache_file)
@@ -171,6 +172,8 @@ class try1(datasets.imdb):
 	    #print 'Removed {} difficult objects'.format(len(data)-len(non_diff_objs))
 	    data = non_diff_objs
 	num_objs = len(data)
+	if num_objs == 0:
+		return None
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
