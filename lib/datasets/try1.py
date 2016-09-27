@@ -177,7 +177,7 @@ class try1(datasets.imdb):
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
-	#difficult = np.zeros((num_objs), dtype=np.int32)
+	difficult = np.zeros((num_objs), dtype=np.int32)
 
         # Load object bounding boxes into a data frame.
         for ix in range(num_objs):
@@ -190,14 +190,16 @@ class try1(datasets.imdb):
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
             overlaps[ix, cls] = 1.0
-	    #difficult[ix] = df == 'True' 
+	    difficult[ix] = df == 'True' 
 
         overlaps = scipy.sparse.csr_matrix(overlaps)
 	
         return {'boxes' : boxes,
                 'gt_classes': gt_classes,
                 'gt_overlaps' : overlaps,
-                'flipped' : False}
+                'flipped' : False,
+		'difficult' : difficult
+		}
 
     def _write_try1_results_file(self, all_boxes):
         use_salt = self.config['use_salt']
@@ -288,7 +290,7 @@ class try1(datasets.imdb):
 	rm_results = self.config['cleanup']
 	recall = []
 	prec = []
-	ap = 0 #average precision?
+	ap = 0 #average precision
 	path = os.path.join(self._devkit_path, 'results', self.name, str(os.getpid()))
 	gt = []
 	tp = [] #true positives
@@ -304,7 +306,7 @@ class try1(datasets.imdb):
         results_CLS_index = [results_CLS_index[i] for i in sorted_ids]
         results_CLS_boxes = [results_CLS_boxes[i] for i in sorted_ids]
         results_CLS_prob = [results_CLS_prob[i] for i in sorted_ids]
-
+	print 'number of detections:', len(sorted_ids)
 	npos = 0
 	#extract ground truth	
 	for i, index in enumerate(self.image_index):
@@ -319,7 +321,7 @@ class try1(datasets.imdb):
 	    gt[i]['index'] = index
 	    gt[i]['det'] = np.zeros(len(gt[i]['gt_classes'])) 
 	    npos = npos + sum(1 - gt[i]['difficult'])
-
+	print 'npos:', npos
 	#for each detection  
 	nd = len(results_CLS_index) #number of detections
 	for nproposal in xrange(nd):
@@ -346,7 +348,8 @@ class try1(datasets.imdb):
 		    ov = iw*ih*1.0/ua
 		    if ov > ov_max:
 			ov_max = ov
-			ngt_max = ngt		
+			ngt_max = ngt
+	    #print 'ngt max', ngt_max		
 	    #assign detection as true positive/don't care/false positive
 	    if ov_max >= MINOVERLAP:
 		#print ov_max
@@ -356,18 +359,26 @@ class try1(datasets.imdb):
 			fp.append(0)
 			gt_i['det'][ngt_max] = 1 #true positive
 			#print gt_boxes
+			#print 'true pos'
 		    else:
 			tp.append(0)
 			fp.append(1) #false positive (multiple detection)
+			#print 'multiple detection'
 	    else:
 		tp.append(0)
 		fp.append(1)
+		#print 'ov_max too small'
 	#compute precision and recall
 	fp = np.cumsum(fp)
 	tp = np.cumsum(tp)
+	fn = npos - tp
+
 	rec = tp*1.0/npos
 	prec = tp*1.0/(fp+tp)
-
+	print 'fp', fp
+	print 'tp', tp
+	#print 'rec', rec
+	#print 'prec', prec
 	#compute average precision
 	for t in np.linspace(0, 1.0, endpoint=True, num=11):
 	    try:
@@ -375,7 +386,7 @@ class try1(datasets.imdb):
 	    except:
 		p = 0
 	    ap = ap + p*1.0/11	
-	return rec, prec, ap, results_CLS_prob
+	return tp, fp, fn, nd, rec, prec, ap, results_CLS_prob
 
     def calculate_auc(self, recall, prec):
 	mrec = [0] + recall + [1]
@@ -398,22 +409,40 @@ class try1(datasets.imdb):
 	precs = []
 	aps = []
 	ap_aucs = []
+	specs = []
+	threshs = []
+	tps = []
+	fps = []
+	fns = []
+	fps = []
+	nds = []
 	results = self._write_try1_results_file(all_boxes )
-	try:
-	  for cls in self._classes:
+	#try:
+	for cls in self._classes:
 	    if cls != '__background__':
 		print cls
-		recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
+		tp, fp, fn, nd, recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
 	    	ap_auc = self.calculate_auc(recall, prec)
 		recalls.append(recall)
 		precs.append(prec)
 		aps.append(ap)
 		ap_aucs.append(ap_auc)
+		threshs.append(thresh)
+		tps.append(tp)
+		fps.append(fp)
+		fns.append(fn)
+		nds.append(nd)
 		print 'avg precision',ap, ap_auc
-		with open(os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl'), 'w') as f:
-            		cPickle.dump({'rec': recall, 'prec': prec, 'ap': ap, 'thresh':thresh}, f)
-	except:
-	   print 'no evaluation'
+		output_file = os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl')
+		print output_file
+	for i in range(len(recalls)):
+		tn = nds.sum() - nds[i] - fns[i]
+		spec = tn*1.0/(fp+tn)
+		specs.append(spec)
+		with open(output_file, 'w') as f:
+            		cPickle.dump({'tp':tps[i], 'fp':fps[i], 'fn':fns[i], 'tn':tn, 'rec': recalls[i], 'prec': precs[i], 'spec': specs[i], 'ap': aps[i], 'thresh':threshs[i]}, f)
+	#except:
+	#   print 'no evaluation'
 
     def competition_mode(self, on):
         if on:

@@ -40,7 +40,7 @@ for top_k in np.arange(1000, 11000, 1000):
 
 # Set up _<split> using selective search "fast" mode
 devkit_path = '/home/ubuntu/try1'
-for split in ['train', 'test']:
+for split in ['train','trainfull', 'test']:
     name = '{}_{}'.format('try1', split)
     __sets[name] = (lambda split=split: datasets.try1.try1(split, devkit_path))
     print 'sets', __sets[name]

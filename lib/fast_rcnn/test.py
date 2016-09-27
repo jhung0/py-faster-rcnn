@@ -119,6 +119,7 @@ def im_detect(net, im, boxes=None):
             background as object category 0)
         boxes (ndarray): R x (4*K) array of predicted bounding boxes
     """
+    #print im
     blobs, im_scales = _get_blobs(im, boxes)
 
     # When mapping from image ROIs to feature map ROIs, there's some aliasing
@@ -259,7 +260,9 @@ def test_net(net, imdb):
             box_proposals = None
         else:
             box_proposals = roidb[i]['boxes'][roidb[i]['gt_classes'] == 0]
+	print 'image path at', imdb.image_path_at(i)
         im = cv2.imread(imdb.image_path_at(i))
+	#print im
         _t['im_detect'].tic()
         scores, boxes = im_detect(net, im, box_proposals)
         _t['im_detect'].toc()
