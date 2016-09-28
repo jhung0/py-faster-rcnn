@@ -405,42 +405,43 @@ class try1(datasets.imdb):
         #self._do_matlab_eval(comp_id, output_dir)
 	
 	#PYTHON evaluation
-	recalls = []
-	precs = []
-	aps = []
-	ap_aucs = []
-	specs = []
-	threshs = []
-	tps = []
-	fps = []
-	fns = []
-	fps = []
-	nds = []
-	results = self._write_try1_results_file(all_boxes )
-	#try:
-	for cls in self._classes:
-	    if cls != '__background__':
-		print cls
-		tp, fp, fn, nd, recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
-	    	ap_auc = self.calculate_auc(recall, prec)
-		recalls.append(recall)
-		precs.append(prec)
-		aps.append(ap)
-		ap_aucs.append(ap_auc)
-		threshs.append(thresh)
-		tps.append(tp)
-		fps.append(fp)
-		fns.append(fn)
-		nds.append(nd)
-		print 'avg precision',ap, ap_auc
+        recalls = []
+        precs = []
+        aps = []
+        ap_aucs = []
+        specs = []
+        threshs = []
+        tps = []
+        fps = []
+        fns = []
+        fps = []
+        nds = []
+        results = self._write_try1_results_file(all_boxes )
+        #try:
+        for cls in self._classes:
+            if cls != '__background__':
+                print cls
+                tp, fp, fn, nd, recall, prec, ap, thresh = self._do_python_eval(results, cls, output_dir, 0.5)
+                ap_auc = self.calculate_auc(recall, prec)
+                recalls.append(recall)
+                precs.append(prec)
+                aps.append(ap)
+                ap_aucs.append(ap_auc)
+                threshs.append(thresh)
+                tps.append(tp)
+                fps.append(fp)
+                fns.append(fn)
+                nds.append(nd)
+                print 'avg precision',ap, ap_auc
+        for i in range(len(recalls)):
+		cls = self._classes[i+1]
+                tn = sum(nds) - nds[i] - fns[i]
+                spec = tn*1.0/(fps[i]+tn)
+                specs.append(spec)
 		output_file = os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl')
-		print output_file
-	for i in range(len(recalls)):
-		tn = nds.sum() - nds[i] - fns[i]
-		spec = tn*1.0/(fp+tn)
-		specs.append(spec)
-		with open(output_file, 'w') as f:
-            		cPickle.dump({'tp':tps[i], 'fp':fps[i], 'fn':fns[i], 'tn':tn, 'rec': recalls[i], 'prec': precs[i], 'spec': specs[i], 'ap': aps[i], 'thresh':threshs[i]}, f)
+                print output_file
+                with open(output_file, 'w') as f:
+                        cPickle.dump({'tp':tps[i], 'fp':fps[i], 'fn':fns[i], 'tn':tn, 'rec': recalls[i], 'prec': precs[i], 'spec': specs[i], 'ap': aps[i], 'thresh':threshs[i]}, f)
 	#except:
 	#   print 'no evaluation'
 
