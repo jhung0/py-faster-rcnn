@@ -102,13 +102,13 @@ class imdb(object):
 	#flip
         for i in xrange(self.num_images):
             boxes = self.roidb[i]['boxes'].copy()
-	    print 'b', boxes
+	    #print 'b', boxes
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
             boxes[:, 0] = [max([1, xmin])-1 for xmin in widths[i] - oldx2]
             boxes[:, 2] = [min([widths[i], xmax])  for xmax in widths[i] - oldx1 - 1]
-	    print widths[i] - oldx2
-	    print boxes
+	    #print widths[i] - oldx2
+	    #print boxes
             assert (boxes[:, 2] >= boxes[:, 0]).all()
             entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
