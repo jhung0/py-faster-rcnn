@@ -17,7 +17,7 @@ class Thresholdout():
 		self.prototxt = "models/VGG_CNN_M_1024/faster_rcnn_end2end/test.prototxt"
 		self.net = "output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_iter_40000.caffemodel"
 		self.cfg_file = "experiments/cfgs/faster_rcnn_end2end.yml"
-
+		self.name = '/home/ubuntu/try1/results/thresholdout.txt'
 	def processOutput(self, proc):
 		results = []
 		for line in proc.stdout:
@@ -54,35 +54,25 @@ class Thresholdout():
 		self.checkBudget()
                 train_score, test_score = self.getScores()
                 print train_score, test_score
-                holdout_score = self.getHoldoutScore(holdout_score, budget, train_score, test_score)
+                holdout_score = self.getHoldoutScore(holdout_score, train_score, test_score)
 		return holdout_score
 
 	def main(self):
 		iter_range = range(10000, 100000, 10000)
-        	learning_range = [.001]#[.01, .005, .001, .0005, .0001]
+        	learning_range = [.008, .005, .001, .0005, .0001]
 		holdout_score = []
-        	for iterations in iter_range:
-			print 'iteration ', iterations
-                	self.net = "output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_iter_" + str(iterations) + ".caffemodel"
-                	for learning in learning_range:
-				'''
-				print 'learning ', learning
-                                new_prototxt = "models/VGG_CNN_M_1024/faster_rcnn_end2end/test_lr"+str(learning)+".prototxt"
-                                copyfile(self.prototxt, new_prototxt)
-                                with open(new_prototxt, "r") as f:
-                                        lines = f.readlines()
-                                with open(new_prototxt, "w") as f:
-                                        for line in lines:
-                                                if 'base_lr' not in line:
-                                                        f.write(line)
-                                                else:
-                                                        f.write('base_lr: '+str(learning))
-                                self.prototxt = new_prototxt
-				'''
-                                holdout_score = self.oneCheck(holdout_score)
-                                print holdout_score
+		for learning in learning_range:
+			print 'learning ', learning
+        		for iterations in iter_range:
+				print 'iteration ', iterations
+				self.net = "output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_iter_" + str(iterations) + "_lr"+ str(learning) + ".caffemodel"
+                                print self.net
+				holdout_score = self.oneCheck(holdout_score)
+                                print 'holdout score', holdout_score
                                 with open(self.name, 'a+') as f:
-                                        print str(iterations)+","+str(learning)+","+holdout_score		
+                                        line = str(iterations)+","+str(learning)+","+str(holdout_score[-1])
+					print line
+					f.write(line+'\n')	
 if __name__ == "__main__":
 	thresholdout = Thresholdout()
 	thresholdout.main()

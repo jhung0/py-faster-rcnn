@@ -6,7 +6,8 @@
 # --------------------------------------------------------
 
 """Train a Fast R-CNN network."""
-
+import matplotlib 
+matplotlib.use('Agg')
 import caffe
 from fast_rcnn.config import cfg
 import roi_data_layer.roidb as rdl_roidb
