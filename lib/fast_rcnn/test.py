@@ -123,7 +123,6 @@ def im_detect(net, im, boxes=None):
     """
     #print im
     blobs, im_scales = _get_blobs(im, boxes)
-
     # When mapping from image ROIs to feature map ROIs, there's some aliasing
     # (some distinct image ROIs get mapped to the same feature ROI).
     # Here, we identify duplicate feature ROIs, so we only compute features
@@ -141,14 +140,12 @@ def im_detect(net, im, boxes=None):
         blobs['im_info'] = np.array(
             [[im_blob.shape[2], im_blob.shape[3], im_scales[0]]],
             dtype=np.float32)
-
     # reshape network inputs
     net.blobs['data'].reshape(*(blobs['data'].shape))
     if cfg.TEST.HAS_RPN:
         net.blobs['im_info'].reshape(*(blobs['im_info'].shape))
     else:
         net.blobs['rois'].reshape(*(blobs['rois'].shape))
-
     # do forward
     forward_kwargs = {'data': blobs['data'].astype(np.float32, copy=False)}
     if cfg.TEST.HAS_RPN:
@@ -156,7 +153,7 @@ def im_detect(net, im, boxes=None):
     else:
         forward_kwargs['rois'] = blobs['rois'].astype(np.float32, copy=False)
     blobs_out = net.forward(**forward_kwargs)
-
+    print 'blobs out done'
     if cfg.TEST.HAS_RPN:
         assert len(im_scales) == 1, "Only single-image batch implemented"
         rois = net.blobs['rois'].data.copy()
@@ -220,7 +217,7 @@ def apply_nms(all_boxes, thresh):
             if dets == []:
                 continue
             keep = nms(dets, thresh)
-	    print 'keep', len(keep)
+	    #print 'keep', len(keep)
             if len(keep) == 0:
                 continue
             nms_boxes[cls_ind][im_ind] = dets[keep, :].copy()
