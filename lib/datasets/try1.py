@@ -25,7 +25,7 @@ class try1(datasets.imdb):
         self._devkit_path = devkit_path
         self._data_path = os.path.join(self._devkit_path, 'data')
         self._classes = ('__background__', # always index 0
-                         'rbc', 'tro', 'sch', 'ring', 'gam', 'leu')
+                         'rbc', 'other')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = ['.jpg', '.tif']
         self._image_index = self._load_image_set_index()
@@ -185,7 +185,12 @@ class try1(datasets.imdb):
                 x1, y1, x2, y2, cls, df = data[ix].strip().split(' ')
             except:
                 raise Exception('Error in reading data, line %s:%s'%(str(ix+1), data[ix]))
-            #pixel indexes 0-based
+            if cls in ['tro', 'sch', 'ring', 'gam', 'leu']:
+		cls = 'other'
+	    elif cls not in self._classes:
+		print 'skip class ', cls
+		continue
+	    #pixel indexes 0-based
             cls = self._class_to_ind[cls]
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
@@ -436,7 +441,9 @@ class try1(datasets.imdb):
         for i in range(len(recalls)):
 		cls = self._classes[i+1]
                 tn = sum(nds) - nds[i] - fns[i]
-                spec = tn*1.0/(fps[i]+tn)
+		tn = np.array([0 if x < 0 else x for x in tn])
+		
+                spec = np.array([0 if fps[i][jj]+tn[jj]== 0 else tn[jj]*1.0/(fps[i][jj]+tn[jj]) for jj in range(len(tn))])
                 specs.append(spec)
 		output_file = os.path.join(output_dir, str(os.getpid()) +'_det_'+ cls + '_r_p_ap.pkl')
                 print output_file
