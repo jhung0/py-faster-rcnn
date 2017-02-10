@@ -143,4 +143,11 @@ RUN cd py-faster-rcnn/caffe-fast-rcnn &&\
 
 RUN cd py-faster-rcnn/caffe-fast-rcnn && make all -j8 && make pycaffe 
 
-
+RUN cd py-faster-rcnn && ls #python run2stage.py \
+	--images test.txt \
+	--cfg experiments/cfgs/faster_rcnn_end2end.yml \
+	--model1 output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_lr0.01_iter_100000.caffemodel \ 
+	--prototxt1 models/VGG_CNN_M_1024/faster_rcnn_end2end/test.prototxt \ 
+	--model2 caffe-fast-rcnn/models/bvlc_reference_caffenet/caffenet_train_iter_40000.caffemodel \ 
+	--prototxt2 caffe-fast-rcnn/models/bvlc_reference_caffenet/deploy.prototxt \
+	--output /home/ubuntu/svg 
