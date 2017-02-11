@@ -71,6 +71,9 @@ RUN pip install --upgrade pip
 
 RUN pip install Cython easydict
 
+RUN mkdir /home/ubuntu && mkdir /home/ubuntu/try1 
+
+WORKDIR /home/ubuntu
 RUN git clone --recursive https://github.com/jhung0/py-faster-rcnn.git 
 
 # Allow it to find CUDA libs
@@ -91,6 +94,6 @@ RUN cd caffe-fast-rcnn &&\
 RUN ls
 RUN cd caffe-fast-rcnn && make all -j8 && make pycaffe 
 
-RUN mkdir /home/ubuntu && mkdir /home/ubuntu/try1 && mkdir output && mkdir output/faster_rcnn_end2end && mkdir output/faster_rcnn_end2end/train && mkdir /home/svg
+RUN mkdir output && mkdir output/faster_rcnn_end2end && mkdir output/faster_rcnn_end2end/train && mkdir /home/svg
 
 ENTRYPOINT ["python", "run2stage.py"]
