@@ -10,7 +10,6 @@ caffe_path = os.path.join(this_dir,  'caffe-fast-rcnn', 'python')
 add_path(caffe_path)
 lib_path = os.path.join(this_dir, 'lib')
 add_path(lib_path)
-print sys.path
 from utils.timer import Timer
 import cv2
 import xml.etree.ElementTree as ET
@@ -28,6 +27,7 @@ import cPickle
 from PIL import Image
 import skimage
 import uuid
+import time
 
 '''
 runs images through 2 stage model, saves label matrices
@@ -368,7 +368,7 @@ if __name__ == '__main__':
 	dimensions = get_dimensions(file_)
 	cfg_from_list(['TEST.SCALES', str([min(dimensions)]), 'TEST.MAX_SIZE', str(max(dimensions))])
 	pprint.pprint(cfg)
-	nms_dets = StageOne(file_, args.prototxt1, args.caffemodel1, classes1, THRESHOLD=1.0/len(classes1), output_dir=args.output_dir)
+	nms_dets = StageOne(file_, args.prototxt1, args.caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
 	stage2_probs = StageTwo(file_, args.prototxt2, args.caffemodel2, nms_dets[classes1.index('other')][0], classes2)
 	#print 'stage 2', stage2_dets
 	CreateSvg(args.output_dir, file_, nms_dets, stage2_probs, classes2)
