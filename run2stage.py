@@ -71,6 +71,8 @@ def parse_args():
 			type=list) 
     parser.add_argument('--output', dest='output_dir',
 			help='output directory',default='/home/ubuntu/svg', type=str)
+    parser.add_argument('--mean2', dest='mean2',
+			help='mean pixels, stage2', default=[189.97, 133.83, 149.26  ], type=list)
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -153,7 +155,7 @@ def StageOne(file_, prototxt, model, classes, THRESHOLD=1.0/3, num_images = 1, o
         cPickle.dump(nms_dets, f, cPickle.HIGHEST_PROTOCOL)
     return nms_dets
 
-def StageTwo(file_path, prototxt, model, detections, classes):
+def StageTwo(file_path, prototxt, model, detections, classes, mean):
     '''
 	run detections from one image through image classifier
 	Return: all detections 
@@ -164,7 +166,7 @@ def StageTwo(file_path, prototxt, model, detections, classes):
     net.name = os.path.splitext(os.path.basename(model))
 
     transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
-    transformer.set_mean('data', np.array([189.97, 133.83, 149.26  ]))
+    transformer.set_mean('data', np.array(mean))
     transformer.set_transpose('data', (2,0,1))
     transformer.set_raw_scale('data', 255.0)
     transformer.set_channel_swap('data', (2,1,0))
@@ -371,7 +373,7 @@ if __name__ == '__main__':
 	nms_dets = StageOne(file_, args.prototxt1, args.caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
 	stage2_probs = StageTwo(file_, args.prototxt2, args.caffemodel2, nms_dets[classes1.index('other')][0], classes2)
 	#print 'stage 2', stage2_dets
-	CreateSvg(args.output_dir, file_, nms_dets, stage2_probs, classes2)
+	CreateSvg(args.output_dir, file_, nms_dets, stage2_probs, classes2, args.mean2)
 
 
 
