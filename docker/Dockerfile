@@ -94,6 +94,11 @@ RUN cd caffe-fast-rcnn &&\
 RUN ls
 RUN cd caffe-fast-rcnn && make all -j8 && make pycaffe 
 
+RUN cd web && \
+	for req in $(cat requirements.txt); do pip install $req; done
+
 RUN mkdir output && mkdir output/faster_rcnn_end2end && mkdir output/faster_rcnn_end2end/train && mkdir /home/ubuntu/svg
 
-ENTRYPOINT ["python", "run2stage.py"]
+WORKDIR web
+ENTRYPOINT ["python"]
+CMD ["app.py"]
