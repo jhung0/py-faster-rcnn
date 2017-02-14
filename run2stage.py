@@ -86,8 +86,6 @@ def StageOne(file_, prototxt, model, classes, THRESHOLD=1.0/3, num_images = 1, o
 	Return: all boxes with score above THRESHOLD
     '''
     net = caffe.Net(prototxt, model, caffe.TEST)
-    print 'prototxt ', prototxt
-    print 'caffemodel ', model
     net.name = os.path.splitext(os.path.basename(model))[0]
  
     _t = {'im_detect' : Timer(), 'misc' : Timer()}
@@ -106,7 +104,6 @@ def StageOne(file_, prototxt, model, classes, THRESHOLD=1.0/3, num_images = 1, o
             box_proposals = None
         else:
             raise Exception("HAS_RPN is False")
-        print 'image path at', file_
         im = cv2.imread(file_)
         _t['im_detect'].tic()
         scores, boxes = im_detect(net, im, box_proposals)
@@ -136,9 +133,9 @@ def StageOne(file_, prototxt, model, classes, THRESHOLD=1.0/3, num_images = 1, o
 
     _t['misc'].toc()
 
-    print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
-              .format(i + 1, num_images, _t['im_detect'].average_time,
-                      _t['misc'].average_time)
+    #print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
+    #          .format(i + 1, num_images, _t['im_detect'].average_time,
+    #                  _t['misc'].average_time)
 
     #only keep boxes with scores above the threshold
     for j in xrange(1, num_classes):
@@ -149,7 +146,7 @@ def StageOne(file_, prototxt, model, classes, THRESHOLD=1.0/3, num_images = 1, o
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:
         cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
-    print 'Applying NMS to all detections'
+    #Apply NMS to all detections
     nms_dets = apply_nms(all_boxes, cfg.TEST.NMS)
     with open(det_file, 'wb') as f:
         cPickle.dump(nms_dets, f, cPickle.HIGHEST_PROTOCOL)
@@ -161,8 +158,6 @@ def StageTwo(file_path, prototxt, model, detections, classes, mean):
 	Return: all detections 
     '''
     net = caffe.Net(prototxt, model, caffe.TEST)
-    print 'prototxt ', prototxt
-    print 'caffemodel ', model
     net.name = os.path.splitext(os.path.basename(model))
 
     transformer = caffe.io.Transformer({'data': net.blobs['data'].data.shape})
@@ -177,14 +172,12 @@ def StageTwo(file_path, prototxt, model, detections, classes, mean):
     #full_im = caffe.io.load_image(file_path)
     full_im = full_im.copy()    #caffe.io.load_image()
     for det_index, det in enumerate(detections):
-	print det_index, det
 	img = full_im.crop((int(det[0]), int(det[1]), int(det[2]), int(det[3])))
 	img.save('/home/ubuntu/stage2.jpg')
 	img = caffe.io.load_image('/home/ubuntu/stage2.jpg')
     	net.blobs['data'].reshape(1, 3, 227,227)
     	net.blobs['data'].data[...] = transformer.preprocess('data', np.array(img))#np.array(img))
     	output = net.forward()
-	print 'output ', output['prob']    
     	probs[det_index] = output['prob']
     return probs
 
@@ -192,7 +185,6 @@ def WriteXml(root, box, cls, attributes_text, index):
 	'''
 	write to Element Tree
 	'''
-	#print 'box ', box
         object_ = ET.Element('object')
         root.append(object_)
         name_ = ET.SubElement(object_, 'name')
@@ -229,14 +221,11 @@ def CreateXml(LabelMe_path, file_, stage1_dets, stage2_probs, classes):
     '''
 	create LabelMe xml file from detection coordinates 
     '''
-    print LabelMe_path, file_
     LabelMe_annotation_dir = os.path.join(LabelMe_path, 'Annotations')    
     file_ = file_.split('Images/')[1]
-    print file_
     image_dir = file_.split('/')[0]
     #make LabelMe xml annotation file
     LabelMe_file = os.path.join(LabelMe_annotation_dir, file_+'.xml')
-    print LabelMe_file
     #clear existing annotations
     tree = ET.parse(LabelMe_file)
     root = tree.getroot()
@@ -246,18 +235,15 @@ def CreateXml(LabelMe_path, file_, stage1_dets, stage2_probs, classes):
     #get detection coordinates
     rbc_dets = stage1_dets[1][0]
     other_dets = stage1_dets[2][0]
-    print rbc_dets[0]
     #for each set of coordinates, create object instance
     for index, box in enumerate(rbc_dets):
 	box = rbc_dets[index][:4]
-	#print box
 	attributes = str(rbc_dets[index][-1])
 	writeXML(root, box, classes[1], attributes, index)
     for index_other, box in enumerate(other_dets):
 	index += 1
 	box = other_dets[index_other][:4]
 	attributes = str(other_dets[index_other][-1])
-	print stage2_probs[index_other], np.argmax(stage2_probs[index_other])
 	writeXML(root, box, classes[np.argmax(stage2_probs[index_other])], attributes, index)
 
     tree.write(LabelMe_file)
@@ -268,7 +254,6 @@ def WriteRect(box, cls, score):
     '''
     write rect to Element Tree
     '''
-    #print 'box ', box
     rect_ = ET.Element('rect')
     rect_.set('description', cls)
     rect_.set('score', str(score))
@@ -290,11 +275,11 @@ def CreateSvg(output_dir, file_, detections, probs, classes):
     '''
 	create svg using original image, detections, probability distributions and save to output
     '''
-    output = os.path.join(output_dir, os.path.basename(file_.rsplit(".",1)[0]) + '.svg')
+    output = os.path.join(output_dir, os.path.basename(file_.rsplit(".",1)[0]))
 
     try:
     	#clear existing annotations
-    	tree = ET.parse(output)
+    	tree = ET.parse(output+'.svg')
     	root = tree.getroot()
     	for obj in root.findall('rect'):
             root.remove(obj)
@@ -311,19 +296,17 @@ def CreateSvg(output_dir, file_, detections, probs, classes):
     #for each set of coordinates, create object instance
     for index, box in enumerate(rbc_dets):
         box = rbc_dets[index]
-        #print box
         attributes = str(rbc_dets[index][-1])
         root.append(WriteRect(box[:4], classes[1], box[4]))
     for index_other, box in enumerate(other_dets):
         index += 1
         box = other_dets[index_other]
         attributes = str(other_dets[index_other][-1])
-        print stage2_probs[index_other], np.argmax(stage2_probs[index_other])
         root.append(WriteRect(box[:4], classes[np.argmax(stage2_probs[index_other])], box[4]))
 
-    tree.write(output)
+    tree.write(output+'.svg')
     os.chmod(output, 0o777)
-    return 0
+    return output 
 
 def get_files(ImageSet_test):
     test_files = []
@@ -348,9 +331,6 @@ if __name__ == '__main__':
         cfg_from_list(args.set_cfgs)
     cfg.GPU_ID = args.gpu_id
 
-    #print('Using config:')
-    #pprint.pprint(cfg)
-
     while not os.path.exists(args.caffemodel1) and args.wait:
         print('Waiting for {} to exist...'.format(args.caffemodel1))
         time.sleep(10)
@@ -372,7 +352,6 @@ if __name__ == '__main__':
 	pprint.pprint(cfg)
 	nms_dets = StageOne(file_, args.prototxt1, args.caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
 	stage2_probs = StageTwo(file_, args.prototxt2, args.caffemodel2, nms_dets[classes1.index('other')][0], classes2)
-	#print 'stage 2', stage2_dets
 	CreateSvg(args.output_dir, file_, nms_dets, stage2_probs, classes2, args.mean2)
 
 
