@@ -4,7 +4,8 @@ lib/build
 data/*
 output/*
 faster_rcnn_models/*
-web/static/*
+web/static/svg/*
+web/static/images/*
 
 !web/static/svg/.gitkeep
 !web/static/images/.gitkeep
