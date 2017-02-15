@@ -261,14 +261,19 @@ def WriteRect(box, cls, score):
     rect_.set('y', str(int(box[1])))
     rect_.set('width', str(int(box[2]-box[0])))
     rect_.set('height', str(int(box[3]-box[1])))
+    rect_.set('fill', 'none')
+    rect_.set('stroke-width', '10')
+    rect_.set('stroke', 'black')
     return rect_
 
-def WriteImage(file_):
+def WriteImage(file_, output):
     '''
     write image
     '''
     image_ = ET.Element('image')
-    image_.set('id', str(uuid.uuid3(uuid.NAMESPACE_DNS, file_)))
+    file_, ext = os.path.splitext(file_)
+    image_dir, file_ = os.path.relpath(file_, output).split('/', 1)
+    image_.set('xlink:href', os.path.join(image_dir, file_+ext))#str(uuid.uuid3(uuid.NAMESPACE_DNS, file_))+ext))
     return image_
 
 def CreateSvg(output_dir, file_, detections, probs, classes):
@@ -286,11 +291,13 @@ def CreateSvg(output_dir, file_, detections, probs, classes):
     except:
 	root = ET.Element('svg')
 	tree = ET.ElementTree(root)
+    root.set('xmlns', "http://www.w3.org/2000/svg")
+    root.set('xmlns:xlink', "http://www.w3.org/1999/xlink")
     #get detection coordinates
     rbc_dets = detections[1][0]
     other_dets = detections[2][0]
     
-    image_ = WriteImage(file_)
+    image_ = WriteImage(file_, output_dir)
     root.append(image_)
 
     #for each set of coordinates, create object instance
@@ -302,10 +309,10 @@ def CreateSvg(output_dir, file_, detections, probs, classes):
         index += 1
         box = other_dets[index_other]
         attributes = str(other_dets[index_other][-1])
-        root.append(WriteRect(box[:4], classes[np.argmax(stage2_probs[index_other])], box[4]))
+        root.append(WriteRect(box[:4], classes[np.argmax(probs[index_other])], box[4]))
 
     tree.write(output+'.svg')
-    os.chmod(output, 0o777)
+    os.chmod(output+'.svg', 0o777)
     return output 
 
 def get_files(ImageSet_test):

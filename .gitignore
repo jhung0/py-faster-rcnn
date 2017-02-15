@@ -4,3 +4,4 @@ lib/build
 data/*
 output/*
 faster_rcnn_models/*
+web/static

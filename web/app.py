@@ -13,16 +13,17 @@ from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
 import uuid
 import time
 
-app = Flask(__name__, instance_path='/home/ubuntu/py-faster-rcnn/web/instance')
+app = Flask(__name__,static_path='/home/ubuntu/py-faster-rcnn/web/static', instance_path='/home/ubuntu/py-faster-rcnn/web/instance')
 #app.config.from_object('app.default_settings')
 #app.config.from_pyfile('app.cfg', silent=True) 
 
 # Configure the image uploading via Flask-Uploads
 images = UploadSet('images', IMAGES)
-app.config['UPLOADED_IMAGES_DEST'] = '/home/ubuntu/images'
+app.config['UPLOADED_IMAGES_DEST'] = '/home/ubuntu/py-faster-rcnn/web/static/images'
+svg_path = '/home/ubuntu/py-faster-rcnn/web/static/svg'
 configure_uploads(app, images)
 
-def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, prototxt2, classes2, mean2, gpu_id=0, output_dir=app.config['UPLOADED_IMAGES_DEST']):
+def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, prototxt2, classes2, mean2, gpu_id=0, output_dir=svg_path):
     cfg_from_file(cfg_file1)
     cfg.GPU_ID = gpu_id
 
@@ -42,7 +43,8 @@ def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, 
 
 @app.route("/predictions/<id>", methods=['GET'])
 def show_prediction(id):
-	return render_template("prediction.html", id=id)
+	#id = str(uuid.uuid3(uuid.NAMESPACE_DNS, id))
+	return render_template("prediction.html", id=os.path.join(svg_path, id))
 
 @app.route('/', methods=['GET', 'POST'])
 def upload():
@@ -59,7 +61,8 @@ def upload():
 	
 	filename = os.path.join(app.config['UPLOADED_IMAGES_DEST'], filename)	
 	prediction_id = predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, prototxt2, classes2, mean2)
-	#prediction_id = str(uuid.uuid3(uuid.NAMESPACE_DNS, prediction_id))
+	prediction_id = os.path.relpath(prediction_id, svg_path)
+	print prediction_id
         return redirect(url_for("show_prediction", id=prediction_id)) 
 
     return render_template('upload.html')#, prediction=prediction)
