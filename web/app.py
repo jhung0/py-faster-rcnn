@@ -68,4 +68,6 @@ def upload():
     return render_template('upload.html')#, prediction=prediction)
 
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0')
+    import logging
+    logging.basicConfig(filename='error.log',level=logging.DEBUG)
+    app.run(debug=False,host='0.0.0.0')

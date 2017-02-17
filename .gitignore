@@ -6,6 +6,7 @@ output/*
 faster_rcnn_models/*
 web/static/svg/*
 web/static/images/*
+web/error.log
 
 !web/static/svg/.gitkeep
 !web/static/images/.gitkeep
