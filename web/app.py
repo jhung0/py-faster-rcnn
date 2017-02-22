@@ -35,7 +35,7 @@ def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, 
     caffe.set_device(gpu_id)
     
     dimensions = get_dimensions(filename)
-    cfg_from_list(['TEST.SCALES', str([min(dimensions)]), 'TEST.MAX_SIZE', str(max(dimensions))])
+    cfg_from_list(['TEST.SCALES', '[1200]', 'TEST.MAX_SIZE', '1600'])
     nms_dets = StageOne(filename, prototxt1, caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
     stage2_probs = StageTwo(filename, prototxt2, caffemodel2, nms_dets[classes1.index('other')][0], classes2, mean2)
     return CreateSvg(output_dir, filename, nms_dets, stage2_probs, classes2)
@@ -49,6 +49,7 @@ def show_prediction(id):
 @app.route('/', methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST' and 'image' in request.files:
+	tic = time.clock()
         filename = images.save(request.files['image'])
 	caffemodel1 = os.path.join(main_dir, 'output/faster_rcnn_end2end/train/vgg_cnn_m_1024_faster_rcnn_lr0.01_iter_100000.caffemodel')	
 	prototxt1 = os.path.join(main_dir, 'models/VGG_CNN_M_1024/faster_rcnn_end2end/test.prototxt')
@@ -63,11 +64,13 @@ def upload():
 	prediction_id = predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, prototxt2, classes2, mean2)
 	prediction_id = os.path.relpath(prediction_id, svg_path)
 	print prediction_id
+	toc = time.clock()
+	print toc-tic
         return redirect(url_for("show_prediction", id=prediction_id)) 
 
     return render_template('upload.html')#, prediction=prediction)
 
 if __name__ == '__main__':
     import logging
-    logging.basicConfig(filename='error.log',level=logging.DEBUG)
+    logging.basicConfig(filename='error.log',level=logging.INFO)
     app.run(debug=False,host='0.0.0.0')
