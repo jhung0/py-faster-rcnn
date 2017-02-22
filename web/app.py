@@ -34,7 +34,6 @@ def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, 
     caffe.set_mode_gpu()
     caffe.set_device(gpu_id)
     
-    dimensions = get_dimensions(filename)
     cfg_from_list(['TEST.SCALES', '[1200]', 'TEST.MAX_SIZE', '1600'])
     nms_dets = StageOne(filename, prototxt1, caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
     stage2_probs = StageTwo(filename, prototxt2, caffemodel2, nms_dets[classes1.index('other')][0], classes2, mean2)
