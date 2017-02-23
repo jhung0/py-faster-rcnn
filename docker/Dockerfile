@@ -1,4 +1,5 @@
-FROM nvidia/cuda:7.0-cudnn4-devel-ubuntu14.04
+FROM ubuntu:14.04 
+#nvidia/cuda:7.0-cudnn4-devel-ubuntu14.04
 
 MAINTAINER Jane Hung <jyhung@mit.edu>
 
@@ -74,7 +75,7 @@ RUN pip install Cython easydict
 RUN mkdir /home/ubuntu && mkdir /home/ubuntu/try1 
 
 WORKDIR /home/ubuntu
-RUN git clone --recursive https://github.com/jhung0/py-faster-rcnn.git 
+RUN git clone --recursive -b cpu https://github.com/jhung0/py-faster-rcnn.git 
 
 # Allow it to find CUDA libs
 #RUN echo "/usr/local/cuda/lib64" > /etc/ld.so.conf.d/cuda.conf && \

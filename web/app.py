@@ -12,7 +12,7 @@ from run2stage import StageOne, StageTwo, CreateSvg, get_dimensions
 from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list
 import uuid
 import time
-
+import pprint
 app = Flask(__name__,static_path='/home/ubuntu/py-faster-rcnn/web/static', instance_path='/home/ubuntu/py-faster-rcnn/web/instance')
 #app.config.from_object('app.default_settings')
 #app.config.from_pyfile('app.cfg', silent=True) 
@@ -37,7 +37,9 @@ def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, 
 
     cfg_from_list(['TEST.SCALES', '[1200]', 'TEST.MAX_SIZE', '1600'])
     nms_dets = StageOne(filename, prototxt1, caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
+    print nms_dets
     stage2_probs = StageTwo(filename, prototxt2, caffemodel2, nms_dets[classes1.index('other')][0], classes2, mean2)
+    print stage2_probs
     return CreateSvg(output_dir, filename, nms_dets, stage2_probs, classes2)
 	
 
