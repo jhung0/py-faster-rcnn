@@ -25,15 +25,16 @@ configure_uploads(app, images)
 
 def predict(filename, caffemodel1, prototxt1, classes1, cfg_file1, caffemodel2, prototxt2, classes2, mean2, gpu_id=0, output_dir=svg_path):
     cfg_from_file(cfg_file1)
-    cfg.GPU_ID = gpu_id
+    #cfg.GPU_ID = gpu_id
 
     while not os.path.exists(caffemodel1):
         print('Waiting for {} to exist...'.format(caffemodel1))
         time.sleep(10)
 
-    caffe.set_mode_gpu()
-    caffe.set_device(gpu_id)
-    
+    #caffe.set_mode_gpu()
+    #caffe.set_device(gpu_id)
+    caffe.set_mode_cpu()
+
     cfg_from_list(['TEST.SCALES', '[1200]', 'TEST.MAX_SIZE', '1600'])
     nms_dets = StageOne(filename, prototxt1, caffemodel1, classes1, THRESHOLD=1.0/len(classes1))
     stage2_probs = StageTwo(filename, prototxt2, caffemodel2, nms_dets[classes1.index('other')][0], classes2, mean2)

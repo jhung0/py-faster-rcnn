@@ -88,7 +88,8 @@ RUN cd caffe-fast-rcnn/python && \
 	for req in $(cat requirements.txt); do pip install $req; done
 
 RUN cd caffe-fast-rcnn &&\ 
-	sed 's/# WITH_PYTHON_LAYER := 1/WITH_PYTHON_LAYER := 1/' Makefile.config.example > Makefile.config #&&\ 
+	sed 's/# WITH_PYTHON_LAYER := 1/WITH_PYTHON_LAYER := 1/' Makefile.config.example > Makefile.config &&\
+	sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/' Makefile.config 
 #	sed -i 's/# USE_CUDNN/USE_CUDNN/' Makefile.config #&&\ 
 
 RUN ls
