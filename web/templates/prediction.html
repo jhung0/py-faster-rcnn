@@ -1,5 +1,102 @@
-<iframe width="100%" height="100%" src="{{ id }}.svg" />
-<form action="{{ url_for('upload') }}">
-    <input type="return" value="Go back to upload page" />
-</form>
+<html>
+<head>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+var infected = ["ring", "trophozoite", "schizont", "gametocyte"];
+var hexLocation = [
+        {color:"lightblue", text: "rbc"},
+        {color:"blue", text: "leukocyte"},
+        {color:"yellow", text: "ring"},
+        {color:"orange", text: "trophozoite"},
+        {color:"red", text: "schizont"},
+        {color:"green", text: "gametocyte"}
+        ];
+var hexKey_color = [];
+hexLocation.forEach(function(d,i) {
+                hexKey_color[d.color] = i;
+        });
+var hexKey_text = [];
+hexLocation.forEach(function(d,i) {
+                hexKey_text[d.text] = i;
+        });
+//var iframe = d3.select(document.getElementsByTagName("IFRAME")[0].contentDocument);
+//var detections = iframe.selectAll(".detection");
 
+function createStats(){
+	var iframe = d3.select(document.getElementsByTagName("IFRAME")[0].contentDocument);
+	var detections = iframe.selectAll(".detection");
+	var stats = d3.select("#summary").append("div").append("ul");
+	var total = stats.append("li").attr("id", "total").text("Total: " + detections._groups[0].length);
+	var total_infected = stats.append("li").attr("id", "total").text("Total infected: " + iframe.selectAll(".infected")._groups[0].length);
+}
+
+function createLegend(){
+	var iframe = d3.select(document.getElementsByTagName("IFRAME")[0].contentDocument);
+	var detections = iframe.selectAll(".detection");
+	var rectWidth = 20;
+	var rectHeight = 20;
+	var legend = d3.select("#summary").append("div").style("float", "right").append("svg").attr("height", "50%").append("g").attr("item", "legend").attr("transform", "translate(0,20)");
+
+	var legend_item = legend.selectAll(".legend_item").data(hexLocation.map(function(d){return d.color;})).enter().append("g").attr("class", "legend_item").attr("transform", function(d, i){return "translate(0, "+ 2*i*rectHeight + ")";}).style("pointer-events", "all");
+	//invisible rect that captures mouseover events
+	legend_item.append("rect").attr("width", 5*rectWidth).attr("height", rectHeight).attr("x", "0").attr("y", -0.75*rectHeight).style("fill", function(d,i){return d;}).style("opacity",0).style("pointer-events", "all").on("mouseover", legendHover).on("mouseout",legendHoverOut);
+	//color legend rect
+	legend_item.append("rect").attr("width", rectWidth).attr("height", rectHeight).attr("x", "0").attr("y", -0.75*rectHeight).style("fill", function(d,i){return d;}).style("pointer-events", "none");
+	//text  
+	legend_item.append("text").text(function(d,i) {return hexLocation[i].text;}).attr("x", 2*rectWidth).style("pointer-events","none");
+	//count
+	legend_item.append("text").text(function(d,i) {return iframe.selectAll("rect[description="+hexLocation[i].text+"]")._groups[0].length}).attr("x", 0).style("pointer-events","none");
+
+	function legendHover(d) {
+		chosenColor = hexLocation[hexKey_color[d]];
+		detections.style("opacity", 0.1);
+		detections.filter("rect[description="+chosenColor.text+"]").style("opacity", 1);
+	}
+
+	function legendHoverOut() {
+		detections.style("opacity", 1);	
+	}
+}
+
+function makeBoxes(){
+	var iframe = d3.select(document.getElementsByTagName("IFRAME")[0].contentDocument);
+	var detections = iframe.selectAll(".detection");
+	detections.each(function(d,i){a=d3.select(this);a.attr("class", function (d){ return $.inArray(a.attr("description"), infected) >= 0 ? "detection infected" : "detection uninfected";});});
+	detections.each(function(d,i){a=d3.select(this);a.style("stroke", hexLocation[hexKey_text[a.attr("description")]].color);});
+}
+
+function runAll(){
+	makeBoxes();
+	createLegend();
+	createStats();
+}
+
+function hide(){
+	var iframe = d3.select(document.getElementsByTagName("IFRAME")[0].contentDocument);
+        var detections = iframe.selectAll(".detection");
+	var hide = document.getElementById("hide");
+	var button = hide.getElementsByTagName("button")[0];
+	if (button.innerHTML == "Hide") {button.innerHTML = "Show"; newOpacity = 0;} else {button.innerHTML = "Hide"; newOpacity = 1;}
+	detections.style("opacity", newOpacity);
+}
+</script>
+</head>
+<body onload="runAll()">
+
+<iframe width="100%" height="100%" src="{{ id }}.svg" >
+</iframe>
+
+<div id="summary">
+</div>
+
+<div id="hide">
+<button onclick="hide()">Hide</button>
+</div>
+
+<div id="return">
+<a href="{{ url_for('upload') }}" class="button">Go back to upload page</a>
+</div>
+
+</body>
+</html>

@@ -255,15 +255,13 @@ def WriteRect(box, cls, score):
     write rect to Element Tree
     '''
     rect_ = ET.Element('rect')
+    rect_.set('class', 'detection')
     rect_.set('description', cls)
     rect_.set('score', str(score))
     rect_.set('x', str(int(box[0])))
     rect_.set('y', str(int(box[1])))
     rect_.set('width', str(int(box[2]-box[0])))
     rect_.set('height', str(int(box[3]-box[1])))
-    rect_.set('fill', 'none')
-    rect_.set('stroke-width', '10')
-    rect_.set('stroke', 'black')
     return rect_
 
 def WriteImage(file_, output):
@@ -274,6 +272,9 @@ def WriteImage(file_, output):
     file_, ext = os.path.splitext(file_)
     image_dir, file_ = os.path.relpath(file_, output).split('/', 1)
     image_.set('xlink:href', os.path.join(image_dir, file_+ext))#str(uuid.uuid3(uuid.NAMESPACE_DNS, file_))+ext))
+    #image_.set('width', "100%")
+    #image_.set('height',"100%")
+    #image_.set('src', os.path.join(image_dir, file_+ext))
     return image_
 
 def CreateSvg(output_dir, file_, detections, probs, classes):
@@ -293,6 +294,13 @@ def CreateSvg(output_dir, file_, detections, probs, classes):
 	tree = ET.ElementTree(root)
     root.set('xmlns', "http://www.w3.org/2000/svg")
     root.set('xmlns:xlink', "http://www.w3.org/1999/xlink")
+    style_ = ET.Element('xhtml:link') 
+    style_.set('type', "text/css") 
+    style_.set('rel', "stylesheet")
+    style_.set('href', "/home/ubuntu/py-faster-rcnn/web/static/styles/mainpage.css")
+    style_.set('xmlns:xhtml',"http://www.w3.org/1999/xhtml")
+    root.append(style_)
+
     #get detection coordinates
     rbc_dets = detections[1][0]
     other_dets = detections[2][0]

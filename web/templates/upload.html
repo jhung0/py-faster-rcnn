@@ -1,8 +1,16 @@
 <html>
 <head>
+	<link rel="stylesheet" href="{{ url_for('static',filename='styles/mainpage.css') }}" />
 	<title>Upload</title>
 </head>
 <body>
+<div class="page-header">
+	<h1>Demo </h1>
+	<p>Implementation of 2 stage method for detection and classification of malaria (P. vivax) blood smear images </p>
+</div>
+<div>
+	<a href="http://ec2-54-175-81-87.compute-1.amazonaws.com:5000/predictions/Snip20170213_5"> Click for an example</a>
+</div>
 <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
 	<input type=file name=image>
 	<input type="submit">

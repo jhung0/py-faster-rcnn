@@ -1,0 +1,29 @@
+html {
+ font-family: sans-serif;
+}
+
+h1 {
+ font-family: Times, serif;
+ line-height: 1.5em;
+ font-size: 36px;
+}
+
+body {
+ font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+ line-height: 1.5em;
+ font-size: 14px;
+}
+
+a {
+ color: #428bca;
+ text-decoration: none;
+}
+
+svg rect {
+ stroke-width: 5px;
+ fill: none;
+}
+
+#summary {
+ float:right;
+}
